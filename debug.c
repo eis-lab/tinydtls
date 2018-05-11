@@ -47,7 +47,8 @@
 #ifdef DTLS_LEVEL_LOG
 static int maxlog = DTLS_LEVEL_LOG;
 #else
-static int maxlog = DTLS_LOG_WARN;	/* default maximum log level */
+//static int maxlog = DTLS_LOG_WARN;	/* default maximum log level */
+static int maxlog = DTLS_LOG_DEBUG;
 #endif
 const char *dtls_package_name() {
   return PACKAGE_NAME;

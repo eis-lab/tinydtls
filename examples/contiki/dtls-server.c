@@ -186,7 +186,7 @@ verify_ecdsa_key(struct dtls_context_t *ctx,
 }
 #endif /* DTLS_ECC */
 
-
+/*
 static void
 tcpip_handler(void)
 {
@@ -205,10 +205,10 @@ tcpip_handler(void)
     PRINTF("%s\n", buf);
 
     uip_udp_packet_send(server_conn, buf, strlen(buf));
-    /* Restore server connection to allow data from any node */
+    // Restore server connection to allow data from any node 
     memset(&server_conn->ripaddr, 0, sizeof(server_conn->ripaddr));
   }
-}
+}*/
 /*---------------------------------------------------------------------------*/
 static void
 print_local_addresses(void)
@@ -234,7 +234,7 @@ dtls_handle_read(dtls_context_t *ctx) {
   if(uip_newdata()) {
     str = uip_appdata; //test
     str[uip_datalen()] = '\0';
-    printf("Server received message: %s\n",str);
+    //printf("Server received message: %s\n",str);
     uip_ipaddr_copy(&session.addr, &UIP_IP_BUF->srcipaddr);
     session.port = UIP_UDP_BUF->srcport;
     session.size = sizeof(session.addr) + sizeof(session.port);

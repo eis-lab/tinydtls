@@ -129,7 +129,7 @@
 /* some constants for the PRF */
 #define PRF_LABEL(Label) prf_label_##Label
 #define PRF_LABEL_SIZE(Label) (sizeof(PRF_LABEL(Label)) - 1)
-
+#define DEBUG 1
 static const unsigned char prf_label_master[] = "master secret";
 static const unsigned char prf_label_key[] = "key expansion";
 static const unsigned char prf_label_client[] = "client";
@@ -3572,6 +3572,8 @@ handle_handshake_msg(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
 
   dtls_debug("handle handshake packet of type: %s (%i)\n",
 	     dtls_handshake_type_to_name(data[0]), data[0]);
+  //printf("handle handshake packet of type: %s (%i)\n",
+   //          dtls_handshake_type_to_name(data[0]), data[0]);
   switch (data[0]) {
 
   /************************************************************************
@@ -3953,7 +3955,8 @@ handle_handshake(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
 
   dtls_debug("received handshake packet of type: %s (%i)\n",
 	     dtls_handshake_type_to_name(hs_header->msg_type), hs_header->msg_type);
-
+  /*printf("received handshake packet of type: %s (%i)\n",
+             dtls_handshake_type_to_name(hs_header->msg_type), hs_header->msg_type);*/
   if (!peer || !peer->handshake_params) {
     /* This is the initial ClientHello */
     if (hs_header->msg_type != DTLS_HT_CLIENT_HELLO && !peer) {
@@ -4151,6 +4154,7 @@ handle_alert(dtls_context_t *ctx, dtls_peer_t *peer,
   if (free_peer) {
     dtls_stop_retransmission(ctx, peer);
     dtls_destroy_peer(ctx, peer, 0);
+    //printf("remove peer!\n");
   }
 
   return free_peer;
@@ -4583,6 +4587,8 @@ dtls_retransmit(dtls_context_t *context, netq_t *node) {
 
 	dtls_debug("** retransmit handshake packet of type: %s (%i)\n",
 	           dtls_handshake_type_to_name(hs_header->msg_type), hs_header->msg_type);
+	/*printf("** retransmit handshake packet of type: %s (%i)\n",
+                   dtls_handshake_type_to_name(hs_header->msg_type), hs_header->msg_type);*/
 #if WITH_HANDSHAKE_STATS
         if(total_start_time && (hs_header->msg_type == DTLS_HT_HELLO_REQUEST ||
                                 hs_header->msg_type == DTLS_HT_CLIENT_HELLO ||

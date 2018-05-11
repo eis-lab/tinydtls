@@ -136,7 +136,7 @@ dtls_dsrv_log_addr(log_t level, const char *name, const struct __session_t *addr
 #define dtls_warn(...) dsrv_log(DTLS_LOG_WARN, __VA_ARGS__)
 #define dtls_notice(...) dsrv_log(DTLS_LOG_NOTICE, __VA_ARGS__)
 #define dtls_info(...) dsrv_log(DTLS_LOG_INFO, __VA_ARGS__)
-#define dtls_debug(...) dsrv_log(DTLS_LOG_DEBUG, __VA_ARGS__)
+#define dtls_debug(...) dsrv_log(DTLS_LOG_WARN, __VA_ARGS__)
 #define dtls_debug_hexdump(name, buf, length) dtls_dsrv_hexdump_log(DTLS_LOG_DEBUG, name, buf, length, 1)
 #define dtls_debug_dump(name, buf, length) dtls_dsrv_hexdump_log(DTLS_LOG_DEBUG, name, buf, length, 0)
 
