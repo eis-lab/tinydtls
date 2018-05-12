@@ -47,6 +47,8 @@
 
 #include "debug.h"
 #include "dtls.h"
+#include "sys/timer.h"
+#include "sys/rtimer.h"
 
 char cfs_buf[]="hello world!\n";
 char read_buf[300];
@@ -58,7 +60,10 @@ unsigned char iv[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 int j;
 int packet_count = 27;
 int it;
-int rtimer_count;
+static int rtimer_count;
+static int rtimer_count2;
+static int timer_count;
+
 #define CFS_READ_MACRO(fd_read, read_buf, size) total = 0;                                                                                                                              \
                                                 while (1) {                                                                                                                             \
                                                     n = cfs_read(fd_read, read_buf + total,size - total);                                                                               \
@@ -278,6 +283,18 @@ verify_ecdsa_key(struct dtls_context_t *ctx,
 }
 #endif /* DTLS_ECC */
 
+static int
+dtls_complete(){
+  printf("\n\nRTIMER_SCEOND: %d\n",RTIMER_SECOND);
+  printf("rtimer_count:%d\n",rtimer_count);
+  printf("rtimer_count2:%d\n",rtimer_count2);
+  rtimer_count2 = rtimer_arch_now() - rtimer_count;
+  printf("complete_count:%d\n",rtimer_count2);
+  printf("complte_seconds :%d\n\n",rtimer_count2/ RTIMER_SECOND);
+  
+
+  return 0;
+}
 /*---------------------------------------------------------------------------*/
 static void
 dtls_handle_read(dtls_context_t *ctx) {
@@ -296,21 +313,8 @@ dtls_handle_read(dtls_context_t *ctx) {
     dtls_handle_message(ctx, &session, uip_appdata, uip_datalen());
   }
 }
-/*---------------------------------------------------------------------------*/
 
-static void
-tcpip_handler(void)
-{
-  char *str;
-
-  if(uip_newdata()) {
-    str = uip_appdata;
-    str[uip_datalen()] = '\0';
-    //printf("Response from the server: '%s'\n", str);
-  }
-}
-/*---------------------------------------------------------------------------*/
-
+/*--------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -388,7 +392,7 @@ init_dtls(session_t *dst) {
   static dtls_handler_t cb = {
     .write = send_to_peer,
     .read  = read_from_peer,
-    .event = NULL,
+    .event = dtls_complete,
 #ifdef DTLS_PSK
     .get_psk_info = get_psk_info,
 #endif /* DTLS_PSK */
@@ -480,7 +484,8 @@ PROCESS_THREAD(udp_client_process, ev, data)
 	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
 
   //etimer_set(&et, SEND_INTERVAL);
-  rtimer_count = rtimer_arch_now;
+  rtimer_count = rtimer_arch_now();
+  printf("\n\nrtimer_count:%d\n\n",rtimer_count);
   connected = dtls_connect(dtls_context, &dst) >= 0;
   while(1) {
     PROCESS_YIELD();
@@ -503,8 +508,8 @@ PROCESS_THREAD(udp_client_process, ev, data)
       if(connected) try_send(dtls_context, &dst);
     }
   }
-  rtimer_count = rtimer_arch_now() - rtimer_count;
-  printf("rtimer :%d\n",rtimer_count);
+  //rtimer_count = rtimer_arch_now() - rtimer_count;
+  //printf("rtimer :%d\n\n",rtimer_count/ RTIMER_SECOND);
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
