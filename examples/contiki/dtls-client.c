@@ -58,7 +58,7 @@ unsigned char iv[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 int j;
 int packet_count = 27;
 int it;
-
+int rtimer_count;
 #define CFS_READ_MACRO(fd_read, read_buf, size) total = 0;                                                                                                                              \
                                                 while (1) {                                                                                                                             \
                                                     n = cfs_read(fd_read, read_buf + total,size - total);                                                                               \
@@ -480,7 +480,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
 	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
 
   //etimer_set(&et, SEND_INTERVAL);
-  
+  rtimer_count = rtimer_arch_now;
   connected = dtls_connect(dtls_context, &dst) >= 0;
   while(1) {
     PROCESS_YIELD();
@@ -492,6 +492,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
 
       printf("\nClient tcpip_event!!\n\n");
       dtls_handle_read(dtls_context);
+
     }
    
     if (buflen) {
@@ -502,7 +503,8 @@ PROCESS_THREAD(udp_client_process, ev, data)
       if(connected) try_send(dtls_context, &dst);
     }
   }
-
+  rtimer_count = rtimer_arch_now() - rtimer_count;
+  printf("rtimer :%d\n",rtimer_count);
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
