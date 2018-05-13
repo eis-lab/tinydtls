@@ -57,6 +57,8 @@
 #include "est-client.h"
 #endif
 
+#define  WITH_HANDSHAKE_STATS 1 //test
+
 #define dtls_set_version(H,V) dtls_int_to_uint16((H)->version, (V))
 #define dtls_set_content_type(H,V) ((H)->content_type = (V) & 0xff)
 #define dtls_set_length(H,V)  ((H)->length = (V))
@@ -280,7 +282,7 @@ dtls_write(struct dtls_context_t *ctx,
     /* dtls_connect() returns a value greater than zero if a new
      * connection attempt is made, 0 for session reuse. */
     res = dtls_connect(ctx, dst);
-
+    printf("dtls_write_no_peer res :%d\n",res);
     return (res >= 0) ? 0 : res;
   } else { /* a session exists, check if it is in state connected */
     
@@ -1550,9 +1552,11 @@ dtls_send_multi(dtls_context_t *ctx, dtls_peer_t *peer,
     if (n) {
       dtls_tick_t now;
       dtls_ticks(&now);
-      n->t = now + 4 * CLOCK_SECOND;
+      //n->t = now + 4 * CLOCK_SECOND;
+      n->t = now + 20 * CLOCK_SECOND;
+      n->timeout = 20 * CLOCK_SECOND;
       n->retransmit_cnt = 0;
-      n->timeout = 4 * CLOCK_SECOND;
+      //n->timeout = 4 * CLOCK_SECOND;
       n->peer = peer;
       n->epoch = (security) ? security->epoch : 0;
       n->type = type;
@@ -4154,7 +4158,7 @@ handle_alert(dtls_context_t *ctx, dtls_peer_t *peer,
   if (free_peer) {
     dtls_stop_retransmission(ctx, peer);
     dtls_destroy_peer(ctx, peer, 0);
-    //printf("remove peer!\n");
+    printf("remove peer!\n");
   }
 
   return free_peer;
@@ -4261,6 +4265,7 @@ dtls_handle_message(dtls_context_t *ctx,
             peer->state = DTLS_STATE_CLOSED;
             dtls_stop_retransmission(ctx, peer); 
             dtls_destroy_peer(ctx, peer, 1);
+	    printf("removing peer\n");
          }
          return err;
       }

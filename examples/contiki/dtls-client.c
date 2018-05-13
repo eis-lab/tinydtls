@@ -43,12 +43,15 @@
 #ifndef DEBUG
 #define DEBUG DEBUG_PRINT
 #endif
+
 #include "net/ip/uip-debug.h"
 
+#include "alert.h"
 #include "debug.h"
 #include "dtls.h"
 #include "sys/timer.h"
 #include "sys/rtimer.h"
+#include "dev/radio.h"
 
 char cfs_buf[]="hello world!\n";
 char read_buf[300];
@@ -63,7 +66,7 @@ int it;
 static int rtimer_count;
 static int rtimer_count2;
 static int timer_count;
-
+static int connected;
 #define CFS_READ_MACRO(fd_read, read_buf, size) total = 0;                                                                                                                              \
                                                 while (1) {                                                                                                                             \
                                                     n = cfs_read(fd_read, read_buf + total,size - total);                                                                               \
@@ -104,7 +107,7 @@ static int timer_count;
 #define UIP_UDP_BUF  ((struct uip_udp_hdr *)&uip_buf[UIP_LLIPH_LEN])
 
 
-#define SEND_INTERVAL		15000 * CLOCK_SECOND
+#define SEND_INTERVAL		5 * CLOCK_SECOND
 #define MAX_PAYLOAD_LEN		120
 
 static struct uip_udp_conn *client_conn;
@@ -136,7 +139,7 @@ AUTOSTART_PROCESSES(&resolv_process,&udp_client_process);
 /*---------------------------------------------------------------------------*/
 static void
 try_send(struct dtls_context_t *ctx, session_t *dst) {
-  //printf("try_send func!!\n");
+  printf("\ntry_send func!!\n");
   int res;
   res = dtls_write(ctx, dst, (uint8 *)buf, buflen);
   if (res >= 0) {
@@ -176,7 +179,7 @@ timeout_handler(void)
 static int
 send_to_peer(struct dtls_context_t *ctx,
              session_t *session, uint8 *data, size_t len) {
-  //PRINTF("send_to_peer func!!!\n");
+  PRINTF("send_to_peer func!!!\n");
   struct uip_udp_conn *conn = (struct uip_udp_conn *)dtls_get_app_data(ctx);
   //dtls_get_app_data(CTX) ((CTX)->app)
   uip_ipaddr_copy(&conn->ripaddr, &session->addr);
@@ -187,7 +190,7 @@ send_to_peer(struct dtls_context_t *ctx,
   //PRINTF(":%d\n", uip_ntohs(conn->rport));
   
   //PRINTF("data:%s\n",data);
-  fd_write = cfs_open("/home/user/cfs_test",CFS_WRITE | CFS_APPEND);
+  /*fd_write = cfs_open("/home/user/cfs_test",CFS_WRITE | CFS_APPEND);
   if(fd_write >= 0){
         //printf("Writing: \n");
         cfs_write(fd_write,data,len);
@@ -195,11 +198,11 @@ send_to_peer(struct dtls_context_t *ctx,
 
   } else{
         //printf("\ncfs_file_open error!\n");
-  }
+  }*/
 
   
   uip_udp_packet_send(conn, data, len);
-  
+  printf("uip_udp_packet send len:%d\n",len);
   /* Restore server connection to allow data from any node */
   /* FIXME: do we want this at all? */
   memset(&conn->ripaddr, 0, sizeof(conn->ripaddr));
@@ -284,14 +287,19 @@ verify_ecdsa_key(struct dtls_context_t *ctx,
 #endif /* DTLS_ECC */
 
 static int
-dtls_complete(){
-  printf("\n\nRTIMER_SCEOND: %d\n",RTIMER_SECOND);
-  printf("rtimer_count:%d\n",rtimer_count);
-  printf("rtimer_count2:%d\n",rtimer_count2);
-  rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  printf("complete_count:%d\n",rtimer_count2);
-  printf("complte_seconds :%d\n\n",rtimer_count2/ RTIMER_SECOND);
-  
+dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
+  if(msg_type == DTLS_EVENT_CONNECTED){
+  	printf("rtimer_count:%d\n",rtimer_count);
+  	printf("rtimer_count2:%d\n",rtimer_count2);
+  	rtimer_count2 = rtimer_arch_now() - rtimer_count;
+ 	printf("complete_count:%d\n",rtimer_count2);
+  	printf("complte_seconds :%d\n\n",rtimer_count2/ RTIMER_SECOND);
+	connected = 1;
+  } else if (msg_type == DTLS_EVENT_CONNECT){
+  	printf("\ndtls_event_connect\n\n");
+  } else{
+	printf("\ndtls complete func!\n\n");
+  } 
 
   return 0;
 }
@@ -429,7 +437,10 @@ init_dtls(session_t *dst) {
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_client_process, ev, data)
 {
-  static int connected = 0;
+  int channel = 26;
+  NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, channel);
+
+  connected = 0;
   static session_t dst;
 
   static struct etimer et;
@@ -475,6 +486,8 @@ PROCESS_THREAD(udp_client_process, ev, data)
   }
   
   /* new connection with remote host */
+ // int channel = 25;
+ // NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, channel);  
   dst.addr = ipaddr;
   init_dtls(&dst);
   serial_line_init();
@@ -483,17 +496,20 @@ PROCESS_THREAD(udp_client_process, ev, data)
   PRINTF(" local/remote port %u/%u\n",
 	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
 
-  //etimer_set(&et, SEND_INTERVAL);
+  etimer_set(&et, SEND_INTERVAL);
   rtimer_count = rtimer_arch_now();
   printf("\n\nrtimer_count:%d\n\n",rtimer_count);
-  connected = dtls_connect(dtls_context, &dst) >= 0;
+  dtls_connect(dtls_context, &dst);
   while(1) {
     PROCESS_YIELD();
-    /*if(etimer_expired(&et)) {
+   if(etimer_expired(&et)) {
      
-      etimer_restart(&et);
-    } else if(ev == tcpip_event) { */
-    if(ev == tcpip_event){
+     if(connected) {
+	printf("test\n");	
+     }
+     // connected = dtls_connect(dtls_context, &dst) >=0;
+    } else if(ev == tcpip_event) { 
+    //if(ev == tcpip_event){
 
       printf("\nClient tcpip_event!!\n\n");
       dtls_handle_read(dtls_context);
