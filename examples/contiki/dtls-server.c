@@ -55,6 +55,7 @@
 
 #define MAX_PAYLOAD_LEN 120
 
+static int connected = 0;
 static struct uip_udp_conn *server_conn;
 
 static dtls_context_t *dtls_context;
@@ -83,6 +84,7 @@ AUTOSTART_PROCESSES(&resolv_process,&udp_server_process);
 static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
+  printf("read from peer func!\n");
   size_t i;
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
@@ -246,13 +248,33 @@ dtls_handle_read(dtls_context_t *ctx) {
     dtls_handle_message(ctx, &session, uip_appdata, uip_datalen());
   }
 }
- 
+static int
+dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
+  if(msg_type == DTLS_EVENT_CONNECTED){
+  	//printf("rtimer_count:%d\n",rtimer_count);
+  	//printf("rtimer_count2:%d\n",rtimer_count2);
+  	//rtimer_count2 = rtimer_arch_now() - rtimer_count;
+ 	//printf("complete_count:%d\n",rtimer_count2);
+  	//printf("complte_seconds :%d\n\n",rtimer_count2/ RTIMER_SECOND);
+	
+	connected = 1;
+	printf("dtls_connected!\n");
+	char buf[]="data reqeust\n";
+	dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
+  } else if (msg_type == DTLS_EVENT_CONNECT){
+  	//printf("\ndtls_event_connect\n\n");
+  } else{
+	//printf("\ndtls complete func!\n\n");
+  } 
+
+  return 0;
+} 
 void
 init_dtls() {
   static dtls_handler_t cb = {
     .write = send_to_peer,
     .read  = read_from_peer,
-    .event = NULL,
+    .event = dtls_complete,
 #ifdef DTLS_PSK
     .get_psk_info = get_psk_info,
 #endif /* DTLS_PSK */
@@ -305,13 +327,19 @@ PROCESS_THREAD(udp_server_process, ev, data)
   }
   
   print_local_addresses();
-  
+  int send_request = 1; 
   while(1) {
     PROCESS_YIELD();
     if(ev == tcpip_event) {
       printf("server recieved a message!!\n"); //test
       dtls_handle_read(dtls_context);
     }
+    /*if(connected){
+	if(send_reqeust){
+		send_request = 0;
+		dtls_write(dtls_context,dtls_context->,(uint8 *)buf,sizeof(buf));
+	}
+    }*/
   }
 
   PROCESS_END();
