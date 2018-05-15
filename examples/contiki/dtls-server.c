@@ -50,6 +50,7 @@
 #include "powertrace.h"
 #endif
 
+#include "sys/rtimer.h"
 #define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define UIP_UDP_BUF  ((struct uip_udp_hdr *)&uip_buf[UIP_LLIPH_LEN])
 
@@ -57,7 +58,8 @@
 
 static int connected = 0;
 static struct uip_udp_conn *server_conn;
-
+static int rtimer_count = 0;
+static int rtimer_count2 = 0;
 static dtls_context_t *dtls_context;
 
 static const unsigned char ecdsa_priv_key[] = {
@@ -84,13 +86,18 @@ AUTOSTART_PROCESSES(&resolv_process,&udp_server_process);
 static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
-  printf("read from peer func!\n");
+  printf("\n\nread from peer func!\n\n");
   size_t i;
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
 
   /* echo incoming application data */
-  dtls_write(ctx, session, data, len);
+  //dtls_write(ctx, session, data, len);
+  rtimer_count2 = RTIMER_NOW() - rtimer_count;
+  rtimer_count = RTIMER_NOW();
+  char buf[]="data reqeust\n";
+  printf("\nrtimer_seconds:%10.7f\nrtimer_count:%d\n\nsend packet!\n",rtimer_count/RTIMER_ARCH_SECOND,rtimer_count);
+  dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
   return 0;
 }
 
@@ -258,8 +265,11 @@ dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned sh
   	//printf("complte_seconds :%d\n\n",rtimer_count2/ RTIMER_SECOND);
 	
 	connected = 1;
-	printf("dtls_connected!\n");
+	printf("dtls_connected!\n\n");
+	//printf("request packet!!!\n\n");
 	char buf[]="data reqeust\n";
+	rtimer_count = RTIMER_NOW();
+	printf("rtimer_count: %d\n RTIMER_ARCH_SECOND:%d\n",rtimer_count,RTIMER_ARCH_SECOND);
 	dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
   } else if (msg_type == DTLS_EVENT_CONNECT){
   	//printf("\ndtls_event_connect\n\n");
@@ -331,7 +341,7 @@ PROCESS_THREAD(udp_server_process, ev, data)
   while(1) {
     PROCESS_YIELD();
     if(ev == tcpip_event) {
-      printf("server recieved a message!!\n"); //test
+      printf("\nserver recieved a message!!\n"); //test
       dtls_handle_read(dtls_context);
     }
     /*if(connected){

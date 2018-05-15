@@ -59,7 +59,7 @@ unsigned char iv[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 int j;
 int packet_count = 27;
 int it;
-
+static int rtimer_count =0;
 #define CFS_READ_MACRO(fd_read, read_buf, size) total = 0;                                                                                                                              \
                                                 while (1) {                                                                                                                             \
                                                     n = cfs_read(fd_read, read_buf + total,size - total);                                                                               \
@@ -145,9 +145,14 @@ static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
   size_t i; 
-  printf("read_from_peer func!\n");
+  printf("\n\nread_from_peer func!\nreceived packet: ");
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
+  rtimer_count = rtimer_arch_now() - rtimer_count;
+  printf("rtimer_count:%d\n",rtimer_count);
+  char buf[] = "client's data";
+  dtls_write(ctx,session,(uint8 *)buf,sizeof(buf));    //using unecrypted data
+  //dtls_write_cfs();  //using 
   return 0;
 }
 
