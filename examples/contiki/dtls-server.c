@@ -94,9 +94,10 @@ read_from_peer(struct dtls_context_t *ctx,
   /* echo incoming application data */
   //dtls_write(ctx, session, data, len);
   rtimer_count2 = RTIMER_NOW() - rtimer_count;
+  //float sec = rtimer_count2/RTIMER_ARCH_SECOND;
   rtimer_count = RTIMER_NOW();
   char buf[]="data reqeust\n";
-  printf("\nrtimer_seconds:%10.7f\nrtimer_count:%d\n\nsend packet!\n",rtimer_count/RTIMER_ARCH_SECOND,rtimer_count);
+  printf("\nrtt_count:%d\nrtimer_count:%d\n\nsend packet!\n",rtimer_count2,rtimer_count);
   dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
   return 0;
 }
