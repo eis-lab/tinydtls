@@ -1527,7 +1527,7 @@ dtls_encrypt_data(dtls_context_t * ctx,dtls_peer_t *dst, uint8 *buf,size_t len){
 			return 0;
 		} else {
 			// have to change func name
-			return dtls_encrypt_x(ctx,peer,dtls_security_params(peer) ,&peer->session,DTLS_CT_APPLICATION_DATA,buf,len,1)
+			return dtls_encrypt_x(ctx,peer,dtls_security_params(peer) ,&peer->session,DTLS_CT_APPLICATION_DATA,&buf,&len,1);
 		}
 	}
 }
@@ -1536,7 +1536,19 @@ static int
 dtls_encrypt_x(dtls_context_t * ctx,dtls_peer_t *peer, dtls_security_parameters_t *security , session_t *session,unsigned char type, uint8 * buf_array[], size_t buf_len_array[], size_t buf_array_len) {
 	unsigned char sendbuf[DTLS_MAX_BUF];
 	size_t len = sizeof(sendbuf);
+	int res;
+	unsigned int i;
+	size_t overall_len = 0;
+
+  res = dtls_prepare_record(peer, security, type, buf_array, buf_len_array, buf_array_len, sendbuf, &len);
+  if(res < 0){
+    printf("res < 0 \n");
+    return 0;
+  }
+  return res;
+
 }
+
 static int
 dtls_send_multi(dtls_context_t *ctx, dtls_peer_t *peer,
 		dtls_security_parameters_t *security , session_t *session,
