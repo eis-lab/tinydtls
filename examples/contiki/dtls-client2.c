@@ -39,7 +39,7 @@
 
 #include "cfs-coffee.h"  //cfs test
 //#include "codo/cfs-coffee-security.h" //cfs test
-
+#define FILENAME "test"
 #ifndef DEBUG
 #define DEBUG DEBUG_PRINT
 #endif
@@ -51,7 +51,6 @@
 
 char cfs_buf[]="hello world!\n";
 char read_buf[300];
-char *filename;
 int fd_write, fd_read;
 int iterator;
 int data_len;
@@ -144,7 +143,7 @@ try_send(struct dtls_context_t *ctx, session_t *dst) {
 static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
-  size_t i; 
+  size_t i;
   printf("\n\nread_from_peer func!\nreceived packet: ");
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
@@ -152,7 +151,7 @@ read_from_peer(struct dtls_context_t *ctx,
   printf("rtimer_count:%d\n",rtimer_count);
   char buf[] = "client's data";
   dtls_write(ctx,session,(uint8 *)buf,sizeof(buf));    //using unecrypted data
-  //dtls_write_cfs();  //using 
+  //dtls_write_cfs();  //using
   return 0;
 }
 
@@ -187,7 +186,7 @@ send_to_peer(struct dtls_context_t *ctx,
   //PRINTF("send to ");
   //PRINT6ADDR(&conn->ripaddr);
   //PRINTF(":%d\n", uip_ntohs(conn->rport));
-  
+
   //PRINTF("data:%s\n",data);
   fd_write = cfs_open("/home/user/cfs_test",CFS_WRITE | CFS_APPEND);
   if(fd_write >= 0){
@@ -199,9 +198,9 @@ send_to_peer(struct dtls_context_t *ctx,
         //printf("\ncfs_file_open error!\n");
   }
 
-  
+
   uip_udp_packet_send(conn, data, len);
-  
+
   /* Restore server connection to allow data from any node */
   /* FIXME: do we want this at all? */
   memset(&conn->ripaddr, 0, sizeof(conn->ripaddr));
@@ -257,7 +256,7 @@ get_psk_info(struct dtls_context_t *ctx UNUSED_PARAM,
   }
   return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
 }
-#endif 
+#endif
 
 #ifdef DTLS_ECC
 static int
@@ -387,21 +386,21 @@ void data_cfs_prepare(){
                     uint8 *data_array[], size_t data_len_array[],
                     size_t data_array_len,
                     uint8 *sendbuf, size_t *rlen)*/
-	
+
 	}
 
 }
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
   if(msg_type == DTLS_EVENT_CONNECTED){
-	
-  	dtls_cfs_prepare();
-	connected = 1;
+
+     dtls_cfs_prepare();
+	   connected = 1;
   } else if (msg_type == DTLS_EVENT_CONNECT){
   	//printf("\ndtls_event_connect\n\n");
   } else{
 	//printf("\ndtls complete func!\n\n");
-  } 
+  }
 
   return 0;
 }
@@ -423,10 +422,10 @@ init_dtls(session_t *dst) {
   PRINTF("DTLS client started\n");
 
   print_local_addresses();
-  
+
   dst->size = sizeof(dst->addr) + sizeof(dst->port);
   dst->port = UIP_HTONS(3000);
-  
+
   //set_connection_address(&dst->addr);
   //client_conn = udp_new(&dst->addr, 0, NULL);
   client_conn = udp_new(&dst->addr, dst->port, NULL);
@@ -456,7 +455,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
 
   PROCESS_BEGIN();
   PRINTF("UDP client process started\n");
-  
+
   /*==============contiki file system====================*/
  /* fd_write = cfs_open("/home/user/cfs_test",CFS_WRITE | CFS_APPEND);
   if(fd_write >= 0){
@@ -471,15 +470,15 @@ PROCESS_THREAD(udp_client_process, ev, data)
   }
  */
   /*======================================================*/
-  
+
 #if UIP_CONF_ROUTER
   set_global_address();
 #endif
-  
+
   dtls_init();
 
   print_local_addresses();
-  
+
   static resolv_status_t status = RESOLV_STATUS_UNCACHED;
   while(status != RESOLV_STATUS_CACHED) {
     status = set_connection_address(&ipaddr);
@@ -491,7 +490,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
       PROCESS_YIELD();
     }
   }
-  
+
   /* new connection with remote host */
   dst.addr = ipaddr;
   init_dtls(&dst);
@@ -502,7 +501,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
 	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
 
   //etimer_set(&et, SEND_INTERVAL);
-  
+
   dtls_connect(dtls_context, &dst);
   while(1) {
     PROCESS_YIELD();
@@ -510,7 +509,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
      // etimer_stop(&et);
       //dtls_connect(dtls_context, &dst);
       //etimer_restart(&et);
-   // } else if(ev == tcpip_event) { 
+   // } else if(ev == tcpip_event) {
     if(ev == tcpip_event){
 
       printf("\nClient tcpip_event!!\n\n");
@@ -520,7 +519,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
       printf("\nconnected and send packet\n");
     }*/
     if (buflen) {
-      if (!connected) { 
+      if (!connected) {
 	connected = dtls_connect(dtls_context, &dst) >= 0;
       }
       printf("connected: %d\n",connected);

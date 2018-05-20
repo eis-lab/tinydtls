@@ -86,18 +86,24 @@ AUTOSTART_PROCESSES(&resolv_process,&udp_server_process);
 static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
-  printf("\n\nread from peer func!\n\n");
+  printf("read from peer func!\n");
   size_t i;
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
+  char buf[30] = "data request\n";
 
-  /* echo incoming application data */
-  //dtls_write(ctx, session, data, len);
-  rtimer_count2 = RTIMER_NOW() - rtimer_count;
-  //float sec = rtimer_count2/RTIMER_ARCH_SECOND;
-  rtimer_count = RTIMER_NOW();
-  char buf[]="data reqeust\n";
-  printf("\nrtt_count:%d\nrtimer_count:%d\n\nsend packet!\n",rtimer_count2,rtimer_count);
+  if(connected) {
+    rtimer_count = rtimer_arch_now();
+    connected = 0;
+    printf("\ndata request send!!\n");
+    dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
+    return 0;
+  }
+
+  rtimer_count2 = rtimer_arch_now() - rtimer_count;
+  rtimer_count = rtimer_arch_now();
+  printf("\nrtimer_count:%d\n\n",rtimer_count2);
+  printf("\ndata request send!!\n");
   dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
   return 0;
 }
@@ -215,7 +221,7 @@ tcpip_handler(void)
     PRINTF("%s\n", buf);
 
     uip_udp_packet_send(server_conn, buf, strlen(buf));
-    // Restore server connection to allow data from any node 
+    // Restore server connection to allow data from any node
     memset(&server_conn->ripaddr, 0, sizeof(server_conn->ripaddr));
   }
 }*/
@@ -240,18 +246,18 @@ print_local_addresses(void)
 static void
 dtls_handle_read(dtls_context_t *ctx) {
   session_t session;
+  memset(&session, 0, sizeof(session_t));
   char *str; //test
   if(uip_newdata()) {
     str = uip_appdata; //test
     str[uip_datalen()] = '\0';
-    //printf("Server received message: %s\n",str);
     uip_ipaddr_copy(&session.addr, &UIP_IP_BUF->srcipaddr);
     session.port = UIP_UDP_BUF->srcport;
     session.size = sizeof(session.addr) + sizeof(session.port);
 
-    PRINTF("server: client ip..");
-    PRINT6ADDR(&(session.addr));
-    PRINTF(" :%d\n",uip_ntohs(session.port));    
+    //PRINTF("server: client ip..");
+    //PRINT6ADDR(&(session.addr));
+    //PRINTF(" :%d\n",uip_ntohs(session.port));
 
     dtls_handle_message(ctx, &session, uip_appdata, uip_datalen());
   }
@@ -259,27 +265,18 @@ dtls_handle_read(dtls_context_t *ctx) {
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
   if(msg_type == DTLS_EVENT_CONNECTED){
-  	//printf("rtimer_count:%d\n",rtimer_count);
-  	//printf("rtimer_count2:%d\n",rtimer_count2);
-  	//rtimer_count2 = rtimer_arch_now() - rtimer_count;
- 	//printf("complete_count:%d\n",rtimer_count2);
-  	//printf("complte_seconds :%d\n\n",rtimer_count2/ RTIMER_SECOND);
-	
+
 	connected = 1;
 	printf("dtls_connected!\n\n");
-	//printf("request packet!!!\n\n");
-	char buf[]="data reqeust\n";
-	rtimer_count = RTIMER_NOW();
-	printf("rtimer_count: %d\n RTIMER_ARCH_SECOND:%d\n",rtimer_count,RTIMER_ARCH_SECOND);
-	dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
+
   } else if (msg_type == DTLS_EVENT_CONNECT){
   	//printf("\ndtls_event_connect\n\n");
   } else{
 	//printf("\ndtls complete func!\n\n");
-  } 
+  }
 
   return 0;
-} 
+}
 void
 init_dtls() {
   static dtls_handler_t cb = {
@@ -328,29 +325,23 @@ PROCESS_THREAD(udp_server_process, ev, data)
   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
 #endif /* UIP_CONF_ROUTER */
-  
+
   dtls_init();
   init_dtls();
-  
+
   if(!dtls_context){
     dtls_emerg("cannot create context\n");
     PROCESS_EXIT();
   }
-  
+
   print_local_addresses();
-  int send_request = 1; 
+  int send_request = 1;
   while(1) {
     PROCESS_YIELD();
     if(ev == tcpip_event) {
       printf("\nserver recieved a message!!\n"); //test
       dtls_handle_read(dtls_context);
     }
-    /*if(connected){
-	if(send_reqeust){
-		send_request = 0;
-		dtls_write(dtls_context,dtls_context->,(uint8 *)buf,sizeof(buf));
-	}
-    }*/
   }
 
   PROCESS_END();

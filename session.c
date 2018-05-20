@@ -78,6 +78,11 @@ dtls_session_init(session_t *sess) {
 
 int
 dtls_session_equals(const session_t *a, const session_t *b) {
-  assert(a); assert(b);
+  assert(a); assert(b); 
+  /*printf("dtls_session_equals\n");
+  printf("size: %d , %d\n",a->size,b->size);
+  printf("port :%d, %d\n", uip_ntohs(a->port),uip_ntohs(b->port));               PRINT6ADDR(a->addr);
+  PRINT6ADDR(b->addr);                                    
+  printf("ifindex: %d, %d\n",a->ifindex,b->ifindex);     */      
   return _dtls_address_equals_impl(a, b);
 }

@@ -1290,7 +1290,7 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
   uint8 *p, *start;
   int res;
   unsigned int i;
-  printf("send buf size : (%d bytes) \n", DTLS_MAX_BUF);
+
   if (*rlen < DTLS_RH_LENGTH) {
     dtls_alert("The sendbuf (%zu bytes) is too small\n", *rlen);
     return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
@@ -1513,8 +1513,7 @@ dtls_send_handshake_msg(dtls_context_t *ctx,
  * @return Less than zero in case of an error or the number of
  *   bytes that have been sent otherwise.
  */
-
-/*int
+int
 dtls_encrypt_data(dtls_context_t * ctx,dtls_peer_t *dst, uint8 *buf,size_t len){
 	dtls_peer_t * peer = dtls_get_peer(ctx,dst);
 
@@ -1528,7 +1527,7 @@ dtls_encrypt_data(dtls_context_t * ctx,dtls_peer_t *dst, uint8 *buf,size_t len){
 			return 0;
 		} else {
 			// have to change func name
-			return dtls_encrypt_x(ctx,peer,dtls_security_params(peer) ,&peer->session,DTLS_CT_APPLICATION_DATA,&buf,&len,1);
+			return dtls_encrypt_x(ctx,peer,dtls_security_params(peer) ,&peer->session,DTLS_CT_APPLICATION_DATA,buf,len,1)
 		}
 	}
 }
@@ -1537,19 +1536,7 @@ static int
 dtls_encrypt_x(dtls_context_t * ctx,dtls_peer_t *peer, dtls_security_parameters_t *security , session_t *session,unsigned char type, uint8 * buf_array[], size_t buf_len_array[], size_t buf_array_len) {
 	unsigned char sendbuf[DTLS_MAX_BUF];
 	size_t len = sizeof(sendbuf);
-	int res;
-	unsigned int i;
-	size_t overall_len = 0;
-
-  res = dtls_prepare_record(peer, security, type, buf_array, buf_len_array, buf_array_len, sendbuf, &len);
-  if(res < 0){
-    printf("res < 0 \n");
-    return 0;
-  }
-  return res;
-
 }
-*/
 static int
 dtls_send_multi(dtls_context_t *ctx, dtls_peer_t *peer,
 		dtls_security_parameters_t *security , session_t *session,
@@ -4503,7 +4490,7 @@ dtls_new_context(void *app_data) {
 void
 dtls_free_context(dtls_context_t *ctx) {
   dtls_peer_t *p;
-  printf("dtls_free_context!\n");
+
   if (!ctx) {
     return;
   }
