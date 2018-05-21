@@ -49,6 +49,7 @@
 #include "dtls.h"
 #include "sys/rtimer.h"
 #define FILENAME "test"
+#define FILENAME2 "test2"
 #define payload 30
 char cfs_buf[payload];
 char read_buf[300];
@@ -147,12 +148,13 @@ static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
   size_t i;
-  char sendbuf[payload];
+  char sendbuf[250];
   printf("\n\nread_from_peer func!\nreceived packet: ");
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
-  rtimer_count = rtimer_arch_now();
+    rtimer_count = rtimer_arch_now();
   int r = cfs_read(fd, &sendbuf, sizeof(sendbuf));
+
   if(r == 0) {
     printf("r is 0\n");
     cfs_close(fd);
@@ -161,11 +163,33 @@ read_from_peer(struct dtls_context_t *ctx,
     cfs_close(fd);
     return 0;
   }
+/*  static inline int dtls_int_to_uint16(unsigned char *field, uint16_t value)
+{
+  field[0] = (value >> 8) & 0xff;
+  field[1] = value & 0xff;
+  return 2;
+}*/
 
-  rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  printf("cfs_read rtimer_count:%d\n",rtimer_count2);
-  printf("\ndtls_wrtie!\n");
-  dtls_write(ctx,session,(uint8 *)sendbuf,sizeof(sendbuf));    //using unecrypted data
+  dtls_int_to_uint8(sendbuf+10, 0x03);
+  dtls_debug_dump("sendbuf: ",sendbuf,13);
+  printf("cfs_Read res:%d\n",r);
+  //rtimer_count2 = rtimer_arch_now() - rtimer_count;
+  //printf("cfs_read rtimer_count:%d\n",rtimer_count2);
+
+  //dtls_write(ctx,session,(uint8 *)sendbuf,sizeof(sendbuf));    //using unecrypted data
+  struct uip_udp_conn *conn = (struct uip_udp_conn *)dtls_get_app_data(ctx);
+
+  uip_ipaddr_copy(&conn->ripaddr, &session->addr);
+
+  conn->rport = UIP_HTONS(3000);
+
+  uip_udp_packet_send(conn, sendbuf, sizeof(sendbuf));
+
+  /* Restore server connection to allow data from any node */
+  /* FIXME: do we want this at all? */
+  memset(&conn->ripaddr, 0, sizeof(conn->ripaddr));
+  memset(&conn->rport, 0, sizeof(conn->rport));
+
   rtimer_count2 = rtimer_arch_now() - rtimer_count;
   printf("dtls_send rtimer_count:%d\n",rtimer_count2);
   return 0;
@@ -212,7 +236,19 @@ send_to_peer(struct dtls_context_t *ctx,
 
   return len;
 }
+static int
+cfs_save_dtls(struct dtls_context_t *ctx,
+             session_t *session, uint8 *data, size_t len){
 
+      int fd2 = cfs_open(FILENAME2,CFS_WRITE);
+          if(fd >= 0){
+            int res = cfs_write(fd2,data,len);
+            printf("cfs_write_res: %d, len:%d\n",res,len);
+          } else{
+            printf("\ncfs_file_open error!\n");
+          }
+      cfs_close(fd2);
+}
 #ifdef DTLS_PSK
 static unsigned char psk_id[PSK_ID_MAXLEN] = PSK_DEFAULT_IDENTITY;
 static size_t psk_id_length = sizeof(PSK_DEFAULT_IDENTITY) - 1;
@@ -384,10 +420,28 @@ set_connection_address(uip_ipaddr_t *ipaddr)
 }
 
 void
-cfs_prepare_data(){
+cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
   char msg[payload];
+  char sendbuf[250];
   int i;
-  fd = cfs_open(FILENAME,CFS_WRITE);
+  //dtls_encrypt_data(dtls_context_t * ctx,dtls_peer_t *dst, uint8 *buf,size_t len,uint8 *sendbuf, size_t s_len);
+  int fd = cfs_open(FILENAME,CFS_WRITE);
+  for(i=0; i < 10; i++){
+    sprintf(msg, "data : %d\n",i);
+    strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);
+    cfs_buf[sizeof(cfs_buf)-1] = '\0';
+    int res = dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
+        printf("dtls_encrypt_data res:%d\n",res);
+        if(fd >= 0){
+          int res = cfs_write(fd,sendbuf,sizeof(sendbuf));
+          printf("cfs_write_res: %d, sendbuf_size:%d\n",res,sizeof(sendbuf));
+        } else{
+          printf("\ncfs_file_open error!\n");
+        }
+  }
+  cfs_close(fd);
+  fd = cfs_open(FILENAME,CFS_READ);
+  /*fd = cfs_open(FILENAME,CFS_WRITE);
    if(fd >= 0){
      for(i=0; i < 100; i++){
        sprintf(msg, "data : %d\n",i);
@@ -400,14 +454,14 @@ cfs_prepare_data(){
   	printf("\ncfs_file_open error!\n");
   }
   cfs_close(fd);
-  fd = cfs_open(FILENAME,CFS_READ);
+  fd = cfs_open(FILENAME,CFS_READ);*/
 }
 
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
   if(msg_type == DTLS_EVENT_CONNECTED){
 
-    cfs_prepare_data();
+    cfs_prepare_data(ctx,session);
 	  connected = 1;
     char buf[30] = "start\n";
     dtls_write(ctx, session, (uint8 *)buf, sizeof(buf));
@@ -471,20 +525,6 @@ PROCESS_THREAD(udp_client_process, ev, data)
   PROCESS_BEGIN();
   PRINTF("UDP client process started\n");
 
-  /*==============contiki file system====================*/
- /* fd_write = cfs_open("/home/user/cfs_test",CFS_WRITE | CFS_APPEND);
-  if(fd_write >= 0){
-	//cfs_buf = "test\n";
-	cfs_write(fd_write,cfs_buf,sizeof(cfs_buf));
-	//cfs_seek(fd_write,0,sizeof(cfs_buf));
-	cfs_read(fd_write,cfs_buf,sizeof(cfs_buf));
-	//printf("Read message: %s\n",cfs_buf);
-	//cfs_close(fd_write);
-  } else{
- 	printf("\ncfs_file_open error!\n");
-  }
- */
-  /*======================================================*/
 
 #if UIP_CONF_ROUTER
   set_global_address();
