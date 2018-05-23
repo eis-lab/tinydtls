@@ -3626,6 +3626,7 @@ decrypt_verify(dtls_peer_t *peer, uint8 *packet, size_t length,
 	   dtls_kb_iv_size(security, peer->role));
 
     /* read epoch and seq_num from message */
+    //DTLS_IV_SIZE = 4
     memcpy(nonce + dtls_kb_iv_size(security, peer->role), *cleartext, 8);
     *cleartext += 8;
     clen -= 8;
@@ -4870,3 +4871,22 @@ PROCESS_THREAD(dtls_retransmit_process, ev, data)
   PROCESS_END();
 }
 #endif /* WITH_CONTIKI */
+
+void
+change_sequence(uint8* buf,int num){
+	//dtls_record_header_t *header = DTLS_RECORD_HEADER(sendbuf);
+  uint64_t seq = (uint64_t) num;
+	buf +=sizeof(uint8); //type
+	buf +=sizeof(uint16); //version
+	buf +=sizeof(uint16); //epoch
+
+	//change the sequence!
+	dtls_int_to_uint48(buf,seq);
+	buf += sizeof(uint48); //seq
+
+	buf += sizeof(uint16); //length
+	buf += sizeof(uint16); //epoch
+
+	dtls_int_to_uint48(buf,seq);
+
+}

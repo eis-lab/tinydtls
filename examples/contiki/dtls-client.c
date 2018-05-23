@@ -63,6 +63,7 @@ int packet_count = 27;
 int it;
 static int rtimer_count =0;
 static int rtimer_count2 =0;
+static int num = 1;
 #define CFS_READ_MACRO(fd_read, read_buf, size) total = 0;                                                                                                                              \
                                                 while (1) {                                                                                                                             \
                                                     n = cfs_read(fd_read, read_buf + total,size - total);                                                                               \
@@ -158,6 +159,7 @@ read_from_peer(struct dtls_context_t *ctx,
   if(r == 0) {
     printf("r is 0\n");
     cfs_close(fd);
+    return 0;
   } else if(r < sizeof(sendbuf)) {
     printf("close cfs\n");
     cfs_close(fd);
@@ -169,9 +171,12 @@ read_from_peer(struct dtls_context_t *ctx,
   field[1] = value & 0xff;
   return 2;
 }*/
-
-  dtls_int_to_uint8(sendbuf+10, 0x03);
-  dtls_debug_dump("sendbuf: ",sendbuf,13);
+  dtls_debug_dump("sendbuf 1:", sendbuf, 21);
+  change_sequence(sendbuf,num);
+  num++;
+  //dtls_record_header_t *header = DTLS_RECORD_HEADER(sendbuf);
+  //dtls_int_to_uint8(sendbuf+10, 0x03);
+  dtls_debug_dump("sendbuf 2:", sendbuf, 21);
   printf("cfs_Read res:%d\n",r);
   //rtimer_count2 = rtimer_arch_now() - rtimer_count;
   //printf("cfs_read rtimer_count:%d\n",rtimer_count2);
@@ -421,12 +426,14 @@ set_connection_address(uip_ipaddr_t *ipaddr)
 
 void
 cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
+
   char msg[payload];
   char sendbuf[250];
   int i;
-  //dtls_encrypt_data(dtls_context_t * ctx,dtls_peer_t *dst, uint8 *buf,size_t len,uint8 *sendbuf, size_t s_len);
   int fd = cfs_open(FILENAME,CFS_WRITE);
+
   for(i=0; i < 10; i++){
+    memset(msg,0,payload);
     sprintf(msg, "data : %d\n",i);
     strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);
     cfs_buf[sizeof(cfs_buf)-1] = '\0';
@@ -441,33 +448,19 @@ cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
   }
   cfs_close(fd);
   fd = cfs_open(FILENAME,CFS_READ);
-  /*fd = cfs_open(FILENAME,CFS_WRITE);
-   if(fd >= 0){
-     for(i=0; i < 100; i++){
-       sprintf(msg, "data : %d\n",i);
-       strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);
-       cfs_buf[sizeof(cfs_buf)-1] = '\0';
-   	   int res = cfs_write(fd,cfs_buf,sizeof(cfs_buf));
-   	   printf("res:%d\n",res);
-     }
-   } else{
-  	printf("\ncfs_file_open error!\n");
-  }
-  cfs_close(fd);
-  fd = cfs_open(FILENAME,CFS_READ);*/
+
 }
 
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
-  if(msg_type == DTLS_EVENT_CONNECTED){
 
+  if(msg_type == DTLS_EVENT_CONNECTED){
     cfs_prepare_data(ctx,session);
 	  connected = 1;
     char buf[30] = "start\n";
     dtls_write(ctx, session, (uint8 *)buf, sizeof(buf));
-  } else if (msg_type == DTLS_EVENT_CONNECT){
 
-  } else{
+  } else if (msg_type == DTLS_EVENT_CONNECT){
 
   }
 

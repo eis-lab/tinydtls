@@ -109,6 +109,8 @@ Discarded input sections
                 0x00000000      0x158 obj_openmote-cc2538/dtls.o
  .text.dtls_check_retransmit
                 0x00000000       0x3e obj_openmote-cc2538/dtls.o
+ .text.change_sequence
+                0x00000000       0x32 obj_openmote-cc2538/dtls.o
  .text          0x00000000        0x0 obj_openmote-cc2538/tinydtls-crypto.o
  .data          0x00000000        0x0 obj_openmote-cc2538/tinydtls-crypto.o
  .bss           0x00000000        0x0 obj_openmote-cc2538/tinydtls-crypto.o
@@ -2551,18 +2553,18 @@ END GROUP
                 0x002022cc       0x2c obj_openmote-cc2538/dtls.o
  .text.dtls_check_tls_extension.isra.8
                 0x002022f8       0x78 obj_openmote-cc2538/dtls.o
- .text.dtls_prepare_record.isra.12
-                0x00202370      0x1f8 obj_openmote-cc2538/dtls.o
- .text.dtls_send_multi
-                0x00202568      0x198 obj_openmote-cc2538/dtls.o
- .text.dtls_retransmit.part.13
-                0x00202700      0x134 obj_openmote-cc2538/dtls.o
- .text.dtls_retransmit
-                0x00202834       0x2c obj_openmote-cc2538/dtls.o
  .text.update_hs_hash.isra.17
-                0x00202860       0x30 obj_openmote-cc2538/dtls.o
+                0x00202370       0x30 obj_openmote-cc2538/dtls.o
  .text.calculate_key_block.isra.20
-                0x00202890      0x228 obj_openmote-cc2538/dtls.o
+                0x002023a0      0x228 obj_openmote-cc2538/dtls.o
+ .text.dtls_prepare_record.isra.12
+                0x002025c8      0x1f8 obj_openmote-cc2538/dtls.o
+ .text.dtls_retransmit.part.13
+                0x002027c0      0x134 obj_openmote-cc2538/dtls.o
+ .text.dtls_retransmit
+                0x002028f4       0x2c obj_openmote-cc2538/dtls.o
+ .text.dtls_send_multi
+                0x00202920      0x198 obj_openmote-cc2538/dtls.o
  .text.dtls_send_handshake_msg_hash
                 0x00202ab8       0xec obj_openmote-cc2538/dtls.o
  .text.dtls_send_client_hello
@@ -3642,16 +3644,16 @@ END GROUP
  .text.nmi_handler
                 0x0020fc9e        0x6 obj_openmote-cc2538/startup-gcc.o
                 0x0020fc9e                nmi_handler
- .text.dtls_set_record_header
-                0x0020fca4       0x56 obj_openmote-cc2538/dtls.o
  .text.dtls_prng
-                0x0020fcfa       0x3c obj_openmote-cc2538/dtls.o
+                0x0020fca4       0x3c obj_openmote-cc2538/dtls.o
  .text.known_cipher.isra.7
-                0x0020fd36       0x16 obj_openmote-cc2538/dtls.o
- .text.dtls_send
-                0x0020fd4c       0x22 obj_openmote-cc2538/dtls.o
+                0x0020fce0       0x16 obj_openmote-cc2538/dtls.o
  .text.dtls_stop_retransmission.isra.16
-                0x0020fd6e       0x40 obj_openmote-cc2538/dtls.o
+                0x0020fcf6       0x40 obj_openmote-cc2538/dtls.o
+ .text.dtls_set_record_header
+                0x0020fd36       0x56 obj_openmote-cc2538/dtls.o
+ .text.dtls_send
+                0x0020fd8c       0x22 obj_openmote-cc2538/dtls.o
  .text.dtls_init
                 0x0020fdae       0x16 obj_openmote-cc2538/dtls.o
                 0x0020fdae                dtls_init
@@ -4337,7 +4339,7 @@ END GROUP
                 0x20000248        0xc obj_openmote-cc2538/csma.o
  .data.packet_memb
                 0x20000254        0xc obj_openmote-cc2538/csma.o
- .data.cb.9549  0x20000260       0x10 dtls-server.co
+ .data.cb.9552  0x20000260       0x10 dtls-server.co
  .data.udp_server_process
                 0x20000270       0x10 dtls-server.co
                 0x20000270                udp_server_process
@@ -5277,6 +5279,7 @@ cfs_readdir                                       obj_openmote-cc2538/cfs-coffee
 cfs_remove                                        obj_openmote-cc2538/cfs-coffee.o
 cfs_seek                                          obj_openmote-cc2538/cfs-coffee.o
 cfs_write                                         obj_openmote-cc2538/cfs-coffee.o
+change_sequence                                   obj_openmote-cc2538/dtls.o
 cleanup_glue                                      /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-reent.o)
 clock_adjust                                      obj_openmote-cc2538/clock.o
                                                   obj_openmote-cc2538/lpm.o

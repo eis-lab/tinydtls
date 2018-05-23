@@ -820,3 +820,4 @@ int send_to_peer(struct dtls_context_t *ctx, session_t *session, uint8 *data, si
  * @endcode
  */
 int dtls_encrypt_data(dtls_context_t * ctx,dtls_peer_t *dst, uint8 *buf,size_t len,uint8 *sendbuf, size_t s_len);
+void change_sequence(uint8* buf,int num);
