@@ -4887,6 +4887,6 @@ change_sequence(uint8* buf,int num){
 	buf += sizeof(uint16); //length
 	buf += sizeof(uint16); //epoch
 
-	dtls_int_to_uint48(buf,seq);
+	//dtls_int_to_uint48(buf,seq);
 
 }

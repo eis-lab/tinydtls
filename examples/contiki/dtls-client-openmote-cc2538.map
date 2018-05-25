@@ -2491,7 +2491,7 @@ LOAD /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a
 LOAD /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a
 END GROUP
 
-.text           0x00202000    0x13ae8
+.text           0x00202000    0x13acc
                 0x00202000                _text = .
  *(SORT(.vectors))
  .vectors       0x00202000      0x28c obj_openmote-cc2538/startup-gcc.o
@@ -3573,676 +3573,675 @@ END GROUP
  .text.print_local_addresses
                 0x0020f644       0x38 dtls-client.co
  .text.read_from_peer
-                0x0020f67c      0x118 dtls-client.co
+                0x0020f67c      0x110 dtls-client.co
  .text.get_psk_info
-                0x0020f794       0x9c dtls-client.co
+                0x0020f78c       0x9c dtls-client.co
  .text.cfs_prepare_data
-                0x0020f830       0xa8 dtls-client.co
-                0x0020f830                cfs_prepare_data
+                0x0020f828       0xa8 dtls-client.co
+                0x0020f828                cfs_prepare_data
  .text.dtls_complete
-                0x0020f8d8       0x50 dtls-client.co
+                0x0020f8d0       0x50 dtls-client.co
  .text.init_dtls
-                0x0020f928       0x78 dtls-client.co
-                0x0020f928                init_dtls
+                0x0020f920       0x78 dtls-client.co
+                0x0020f920                init_dtls
  .text.process_thread_udp_client_process
-                0x0020f9a0      0x2e4 dtls-client.co
- .text          0x0020fc84       0x30 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_aeabi_uldivmod.o)
-                0x0020fc84                __aeabi_uldivmod
- .text          0x0020fcb4       0x60 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(bpabi.o)
-                0x0020fcb4                __gnu_ldivmod_helper
-                0x0020fce4                __gnu_uldivmod_helper
- .text          0x0020fd14        0x4 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_dvmd_tls.o)
-                0x0020fd14                __aeabi_ldiv0
-                0x0020fd14                __aeabi_idiv0
- .text          0x0020fd18      0x2ac /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_divdi3.o)
-                0x0020fd18                __divdi3
- .text          0x0020ffc4      0x270 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_udivdi3.o)
-                0x0020ffc4                __udivdi3
- .text.memcmp   0x00210234       0x64 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memcmp.o)
-                0x00210234                memcmp
- .text          0x00210298       0xec /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memcpy.o)
-                0x00210298                memcpy
- .text.memmove  0x00210384       0xc8 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memmove.o)
-                0x00210384                memmove
- .text.memset   0x0021044c       0x9c /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memset.o)
-                0x0021044c                memset
+                0x0020f998      0x2e8 dtls-client.co
+ .text          0x0020fc80       0x30 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_aeabi_uldivmod.o)
+                0x0020fc80                __aeabi_uldivmod
+ .text          0x0020fcb0       0x60 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(bpabi.o)
+                0x0020fcb0                __gnu_ldivmod_helper
+                0x0020fce0                __gnu_uldivmod_helper
+ .text          0x0020fd10        0x4 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_dvmd_tls.o)
+                0x0020fd10                __aeabi_ldiv0
+                0x0020fd10                __aeabi_idiv0
+ .text          0x0020fd14      0x2ac /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_divdi3.o)
+                0x0020fd14                __divdi3
+ .text          0x0020ffc0      0x270 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_udivdi3.o)
+                0x0020ffc0                __udivdi3
+ .text.memcmp   0x00210230       0x64 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memcmp.o)
+                0x00210230                memcmp
+ .text          0x00210294       0xec /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memcpy.o)
+                0x00210294                memcpy
+ .text.memmove  0x00210380       0xc8 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memmove.o)
+                0x00210380                memmove
+ .text.memset   0x00210448       0x9c /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-memset.o)
+                0x00210448                memset
  .text.strcasecmp
-                0x002104e8       0x40 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strcasecmp.o)
-                0x002104e8                strcasecmp
- .text          0x00210528      0x1bc /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strcmp.o)
-                0x00210528                strcmp
- .text.strlen   0x002106e4       0x5c /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strlen.o)
-                0x002106e4                strlen
+                0x002104e4       0x40 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strcasecmp.o)
+                0x002104e4                strcasecmp
+ .text          0x00210524      0x1bc /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strcmp.o)
+                0x00210524                strcmp
+ .text.strlen   0x002106e0       0x5c /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strlen.o)
+                0x002106e0                strlen
  .text.strncasecmp
-                0x00210740       0x54 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strncasecmp.o)
-                0x00210740                strncasecmp
- .text.strncat  0x00210794       0x5c /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strncat.o)
-                0x00210794                strncat
- .text.strncpy  0x002107f0       0x68 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strncpy.o)
-                0x002107f0                strncpy
+                0x0021073c       0x54 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strncasecmp.o)
+                0x0021073c                strncasecmp
+ .text.strncat  0x00210790       0x5c /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strncat.o)
+                0x00210790                strncat
+ .text.strncpy  0x002107ec       0x68 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-strncpy.o)
+                0x002107ec                strncpy
  .text.default_handler
-                0x00210858        0x2 obj_openmote-cc2538/startup-gcc.o
-                0x00210858                default_handler
+                0x00210854        0x2 obj_openmote-cc2538/startup-gcc.o
+                0x00210854                default_handler
  .text.nmi_handler
-                0x0021085a        0x6 obj_openmote-cc2538/startup-gcc.o
-                0x0021085a                nmi_handler
+                0x00210856        0x6 obj_openmote-cc2538/startup-gcc.o
+                0x00210856                nmi_handler
  .text.dtls_prng
-                0x00210860       0x3c obj_openmote-cc2538/dtls.o
+                0x0021085c       0x3c obj_openmote-cc2538/dtls.o
  .text.known_cipher.isra.7
-                0x0021089c       0x16 obj_openmote-cc2538/dtls.o
+                0x00210898       0x16 obj_openmote-cc2538/dtls.o
  .text.dtls_stop_retransmission.isra.16
-                0x002108b2       0x40 obj_openmote-cc2538/dtls.o
+                0x002108ae       0x40 obj_openmote-cc2538/dtls.o
  .text.dtls_set_record_header
-                0x002108f2       0x56 obj_openmote-cc2538/dtls.o
+                0x002108ee       0x56 obj_openmote-cc2538/dtls.o
  .text.dtls_send
-                0x00210948       0x22 obj_openmote-cc2538/dtls.o
+                0x00210944       0x22 obj_openmote-cc2538/dtls.o
  .text.dtls_init
-                0x0021096a       0x16 obj_openmote-cc2538/dtls.o
-                0x0021096a                dtls_init
+                0x00210966       0x16 obj_openmote-cc2538/dtls.o
+                0x00210966                dtls_init
  .text.dtls_get_peer
-                0x00210980       0x24 obj_openmote-cc2538/dtls.o
-                0x00210980                dtls_get_peer
+                0x0021097c       0x24 obj_openmote-cc2538/dtls.o
+                0x0021097c                dtls_get_peer
  .text.dtls_alert_send_from_err
-                0x002109a4       0x6a obj_openmote-cc2538/dtls.o
+                0x002109a0       0x6a obj_openmote-cc2538/dtls.o
  .text.change_sequence
-                0x00210a0e       0x32 obj_openmote-cc2538/dtls.o
-                0x00210a0e                change_sequence
+                0x00210a0a       0x1c obj_openmote-cc2538/dtls.o
+                0x00210a0a                change_sequence
  .text.dtls_p_hash
-                0x00210a40      0x146 obj_openmote-cc2538/tinydtls-crypto.o
-                0x00210a40                dtls_p_hash
+                0x00210a26      0x146 obj_openmote-cc2538/tinydtls-crypto.o
+                0x00210a26                dtls_p_hash
  .text.dtls_prf
-                0x00210b86       0x46 obj_openmote-cc2538/tinydtls-crypto.o
-                0x00210b86                dtls_prf
+                0x00210b6c       0x46 obj_openmote-cc2538/tinydtls-crypto.o
+                0x00210b6c                dtls_prf
  .text.dtls_psk_pre_master_secret
-                0x00210bcc       0x44 obj_openmote-cc2538/tinydtls-crypto.o
-                0x00210bcc                dtls_psk_pre_master_secret
+                0x00210bb2       0x44 obj_openmote-cc2538/tinydtls-crypto.o
+                0x00210bb2                dtls_psk_pre_master_secret
  .text.netq_head
-                0x00210c10        0x8 obj_openmote-cc2538/netq.o
-                0x00210c10                netq_head
+                0x00210bf6        0x8 obj_openmote-cc2538/netq.o
+                0x00210bf6                netq_head
  .text.netq_next
-                0x00210c18        0x8 obj_openmote-cc2538/netq.o
-                0x00210c18                netq_next
+                0x00210bfe        0x8 obj_openmote-cc2538/netq.o
+                0x00210bfe                netq_next
  .text.netq_remove
-                0x00210c20        0xa obj_openmote-cc2538/netq.o
-                0x00210c20                netq_remove
+                0x00210c06        0xa obj_openmote-cc2538/netq.o
+                0x00210c06                netq_remove
  .text.dtls_ticks
-                0x00210c2a        0xc obj_openmote-cc2538/dtls_time.o
-                0x00210c2a                dtls_ticks
+                0x00210c10        0xc obj_openmote-cc2538/dtls_time.o
+                0x00210c10                dtls_ticks
  .text.rijndael_set_key_enc_only
-                0x00210c36       0x18 obj_openmote-cc2538/rijndael.o
-                0x00210c36                rijndael_set_key_enc_only
+                0x00210c1c       0x18 obj_openmote-cc2538/rijndael.o
+                0x00210c1c                rijndael_set_key_enc_only
  .text.rijndael_encrypt
-                0x00210c4e       0x16 obj_openmote-cc2538/rijndael.o
-                0x00210c4e                rijndael_encrypt
- .text.memxor   0x00210c64       0x1a obj_openmote-cc2538/tinydtls-ccm.o
- .text.block0   0x00210c7e       0x44 obj_openmote-cc2538/tinydtls-ccm.o
- .text.mac      0x00210cc2       0x22 obj_openmote-cc2538/tinydtls-ccm.o
+                0x00210c34       0x16 obj_openmote-cc2538/rijndael.o
+                0x00210c34                rijndael_encrypt
+ .text.memxor   0x00210c4a       0x1a obj_openmote-cc2538/tinydtls-ccm.o
+ .text.block0   0x00210c64       0x44 obj_openmote-cc2538/tinydtls-ccm.o
+ .text.mac      0x00210ca8       0x22 obj_openmote-cc2538/tinydtls-ccm.o
  .text.dtls_ccm_encrypt_message
-                0x00210ce4      0x120 obj_openmote-cc2538/tinydtls-ccm.o
-                0x00210ce4                dtls_ccm_encrypt_message
+                0x00210cca      0x120 obj_openmote-cc2538/tinydtls-ccm.o
+                0x00210cca                dtls_ccm_encrypt_message
  .text.dtls_ccm_decrypt_message
-                0x00210e04      0x148 obj_openmote-cc2538/tinydtls-ccm.o
-                0x00210e04                dtls_ccm_decrypt_message
- .text.fade     0x00210f4c       0x54 obj_openmote-cc2538/contiki-main.o
+                0x00210dea      0x148 obj_openmote-cc2538/tinydtls-ccm.o
+                0x00210dea                dtls_ccm_decrypt_message
+ .text.fade     0x00210f32       0x54 obj_openmote-cc2538/contiki-main.o
  .text.board_init
-                0x00210fa0        0x4 obj_openmote-cc2538/board.o
-                0x00210fa0                board_init
+                0x00210f86        0x4 obj_openmote-cc2538/board.o
+                0x00210f86                board_init
  .text.clock_isr
-                0x00210fa4        0x4 obj_openmote-cc2538/clock.o
-                0x00210fa4                clock_isr
+                0x00210f8a        0x4 obj_openmote-cc2538/clock.o
+                0x00210f8a                clock_isr
  .text.rtimer_arch_init
-                0x00210fa8        0x2 obj_openmote-cc2538/rtimer-arch.o
-                0x00210fa8                rtimer_arch_init
+                0x00210f8e        0x2 obj_openmote-cc2538/rtimer-arch.o
+                0x00210f8e                rtimer_arch_init
  .text.uart0_isr
-                0x00210faa        0x6 obj_openmote-cc2538/uart.o
-                0x00210faa                uart0_isr
+                0x00210f90        0x6 obj_openmote-cc2538/uart.o
+                0x00210f90                uart0_isr
  .text.uart1_isr
-                0x00210fb0        0x6 obj_openmote-cc2538/uart.o
-                0x00210fb0                uart1_isr
+                0x00210f96        0x6 obj_openmote-cc2538/uart.o
+                0x00210f96                uart1_isr
  .text.gpio_port_a_isr
-                0x00210fb6        0x6 obj_openmote-cc2538/gpio.o
-                0x00210fb6                gpio_port_a_isr
+                0x00210f9c        0x6 obj_openmote-cc2538/gpio.o
+                0x00210f9c                gpio_port_a_isr
  .text.gpio_port_b_isr
-                0x00210fbc        0x6 obj_openmote-cc2538/gpio.o
-                0x00210fbc                gpio_port_b_isr
+                0x00210fa2        0x6 obj_openmote-cc2538/gpio.o
+                0x00210fa2                gpio_port_b_isr
  .text.gpio_port_c_isr
-                0x00210fc2        0x6 obj_openmote-cc2538/gpio.o
-                0x00210fc2                gpio_port_c_isr
+                0x00210fa8        0x6 obj_openmote-cc2538/gpio.o
+                0x00210fa8                gpio_port_c_isr
  .text.gpio_port_d_isr
-                0x00210fc8        0x6 obj_openmote-cc2538/gpio.o
-                0x00210fc8                gpio_port_d_isr
- .text.send     0x00210fce       0x12 obj_openmote-cc2538/cc2538-rf.o
- .text.putchar  0x00210fe0       0x10 obj_openmote-cc2538/dbg.o
-                0x00210fe0                putchar
+                0x00210fae        0x6 obj_openmote-cc2538/gpio.o
+                0x00210fae                gpio_port_d_isr
+ .text.send     0x00210fb4       0x12 obj_openmote-cc2538/cc2538-rf.o
+ .text.putchar  0x00210fc6       0x10 obj_openmote-cc2538/dbg.o
+                0x00210fc6                putchar
  .text.dbg_send_bytes
-                0x00210ff0       0x20 obj_openmote-cc2538/dbg.o
-                0x00210ff0                dbg_send_bytes
- .text.puts     0x00211010       0x20 obj_openmote-cc2538/dbg.o
-                0x00211010                puts
+                0x00210fd6       0x20 obj_openmote-cc2538/dbg.o
+                0x00210fd6                dbg_send_bytes
+ .text.puts     0x00210ff6       0x20 obj_openmote-cc2538/dbg.o
+                0x00210ff6                puts
  .text.configure
-                0x00211030        0x4 obj_openmote-cc2538/cc2538-temp-sensor.o
- .text.status   0x00211034        0x4 obj_openmote-cc2538/cc2538-temp-sensor.o
- .text.value    0x00211038       0x34 obj_openmote-cc2538/cc2538-temp-sensor.o
+                0x00211016        0x4 obj_openmote-cc2538/cc2538-temp-sensor.o
+ .text.status   0x0021101a        0x4 obj_openmote-cc2538/cc2538-temp-sensor.o
+ .text.value    0x0021101e       0x34 obj_openmote-cc2538/cc2538-temp-sensor.o
  .text.read_header
-                0x0021106c        0x8 obj_openmote-cc2538/cfs-coffee.o
+                0x00211052        0x8 obj_openmote-cc2538/cfs-coffee.o
  .text.file_end
-                0x00211074       0x50 obj_openmote-cc2538/cfs-coffee.o
+                0x0021105a       0x50 obj_openmote-cc2538/cfs-coffee.o
  .text.write_header
-                0x002110c4       0x10 obj_openmote-cc2538/cfs-coffee.o
+                0x002110aa       0x10 obj_openmote-cc2538/cfs-coffee.o
  .text.next_file.isra.0
-                0x002110d4       0x1a obj_openmote-cc2538/cfs-coffee.o
+                0x002110ba       0x1a obj_openmote-cc2538/cfs-coffee.o
  .text.cfs_coffee_arch_erase
-                0x002110ee       0x1e obj_openmote-cc2538/cfs-coffee-arch.o
-                0x002110ee                cfs_coffee_arch_erase
+                0x002110d4       0x1e obj_openmote-cc2538/cfs-coffee-arch.o
+                0x002110d4                cfs_coffee_arch_erase
  .text.cfs_coffee_arch_write
-                0x0021110c       0xc2 obj_openmote-cc2538/cfs-coffee-arch.o
-                0x0021110c                cfs_coffee_arch_write
+                0x002110f2       0xc2 obj_openmote-cc2538/cfs-coffee-arch.o
+                0x002110f2                cfs_coffee_arch_write
  .text.cfs_coffee_arch_read
-                0x002111ce       0x24 obj_openmote-cc2538/cfs-coffee-arch.o
-                0x002111ce                cfs_coffee_arch_read
+                0x002111b4       0x24 obj_openmote-cc2538/cfs-coffee-arch.o
+                0x002111b4                cfs_coffee_arch_read
  .text.write_str
-                0x002111f2       0x10 obj_openmote-cc2538/dbg-printf.o
+                0x002111d8       0x10 obj_openmote-cc2538/dbg-printf.o
  .text.buffer_str
-                0x00211202       0x16 obj_openmote-cc2538/dbg-sprintf.o
+                0x002111e8       0x16 obj_openmote-cc2538/dbg-sprintf.o
  .text.autostart_start
-                0x00211218       0x14 obj_openmote-cc2538/autostart.o
-                0x00211218                autostart_start
+                0x002111fe       0x14 obj_openmote-cc2538/autostart.o
+                0x002111fe                autostart_start
  .text.energest_init
-                0x0021122c        0x2 obj_openmote-cc2538/energest.o
-                0x0021122c                energest_init
+                0x00211212        0x2 obj_openmote-cc2538/energest.o
+                0x00211212                energest_init
  .text.etimer_set
-                0x0021122e       0x12 obj_openmote-cc2538/etimer.o
-                0x0021122e                etimer_set
+                0x00211214       0x12 obj_openmote-cc2538/etimer.o
+                0x00211214                etimer_set
  .text.etimer_reset
-                0x00211240       0x12 obj_openmote-cc2538/etimer.o
-                0x00211240                etimer_reset
+                0x00211226       0x12 obj_openmote-cc2538/etimer.o
+                0x00211226                etimer_reset
  .text.etimer_restart
-                0x00211252       0x12 obj_openmote-cc2538/etimer.o
-                0x00211252                etimer_restart
+                0x00211238       0x12 obj_openmote-cc2538/etimer.o
+                0x00211238                etimer_restart
  .text.etimer_expired
-                0x00211264        0xa obj_openmote-cc2538/etimer.o
-                0x00211264                etimer_expired
+                0x0021124a        0xa obj_openmote-cc2538/etimer.o
+                0x0021124a                etimer_expired
  .text.etimer_expiration_time
-                0x0021126e        0x6 obj_openmote-cc2538/etimer.o
-                0x0021126e                etimer_expiration_time
+                0x00211254        0x6 obj_openmote-cc2538/etimer.o
+                0x00211254                etimer_expiration_time
  .text.call_process
-                0x00211274        0xc obj_openmote-cc2538/process.o
+                0x0021125a        0xc obj_openmote-cc2538/process.o
  .text.rtimer_init
-                0x00211280        0x4 obj_openmote-cc2538/rtimer.o
-                0x00211280                rtimer_init
+                0x00211266        0x4 obj_openmote-cc2538/rtimer.o
+                0x00211266                rtimer_init
  .text.stimer_set
-                0x00211284        0xe obj_openmote-cc2538/stimer.o
-                0x00211284                stimer_set
+                0x0021126a        0xe obj_openmote-cc2538/stimer.o
+                0x0021126a                stimer_set
  .text.timer_set
-                0x00211292        0xe obj_openmote-cc2538/timer.o
-                0x00211292                timer_set
+                0x00211278        0xe obj_openmote-cc2538/timer.o
+                0x00211278                timer_set
  .text.timer_reset
-                0x002112a0        0xa obj_openmote-cc2538/timer.o
-                0x002112a0                timer_reset
+                0x00211286        0xa obj_openmote-cc2538/timer.o
+                0x00211286                timer_reset
  .text.timer_restart
-                0x002112aa        0xc obj_openmote-cc2538/timer.o
-                0x002112aa                timer_restart
+                0x00211290        0xc obj_openmote-cc2538/timer.o
+                0x00211290                timer_restart
  .text.timer_expired
-                0x002112b6       0x1c obj_openmote-cc2538/timer.o
-                0x002112b6                timer_expired
+                0x0021129c       0x1c obj_openmote-cc2538/timer.o
+                0x0021129c                timer_expired
  .text.list_init
-                0x002112d2        0x6 obj_openmote-cc2538/list.o
-                0x002112d2                list_init
+                0x002112b8        0x6 obj_openmote-cc2538/list.o
+                0x002112b8                list_init
  .text.list_head
-                0x002112d8        0x4 obj_openmote-cc2538/list.o
-                0x002112d8                list_head
+                0x002112be        0x4 obj_openmote-cc2538/list.o
+                0x002112be                list_head
  .text.list_tail
-                0x002112dc       0x10 obj_openmote-cc2538/list.o
-                0x002112dc                list_tail
+                0x002112c2       0x10 obj_openmote-cc2538/list.o
+                0x002112c2                list_tail
  .text.list_pop
-                0x002112ec        0xc obj_openmote-cc2538/list.o
-                0x002112ec                list_pop
+                0x002112d2        0xc obj_openmote-cc2538/list.o
+                0x002112d2                list_pop
  .text.list_remove
-                0x002112f8       0x28 obj_openmote-cc2538/list.o
-                0x002112f8                list_remove
+                0x002112de       0x28 obj_openmote-cc2538/list.o
+                0x002112de                list_remove
  .text.list_add
-                0x00211320       0x1e obj_openmote-cc2538/list.o
-                0x00211320                list_add
+                0x00211306       0x1e obj_openmote-cc2538/list.o
+                0x00211306                list_add
  .text.list_push
-                0x0021133e       0x12 obj_openmote-cc2538/list.o
-                0x0021133e                list_push
+                0x00211324       0x12 obj_openmote-cc2538/list.o
+                0x00211324                list_push
  .text.list_length
-                0x00211350        0xe obj_openmote-cc2538/list.o
-                0x00211350                list_length
+                0x00211336        0xe obj_openmote-cc2538/list.o
+                0x00211336                list_length
  .text.list_insert
-                0x0021135e       0x10 obj_openmote-cc2538/list.o
-                0x0021135e                list_insert
+                0x00211344       0x10 obj_openmote-cc2538/list.o
+                0x00211344                list_insert
  .text.list_item_next
-                0x0021136e        0x6 obj_openmote-cc2538/list.o
-                0x0021136e                list_item_next
+                0x00211354        0x6 obj_openmote-cc2538/list.o
+                0x00211354                list_item_next
  .text.memb_init
-                0x00211374       0x20 obj_openmote-cc2538/memb.o
-                0x00211374                memb_init
+                0x0021135a       0x20 obj_openmote-cc2538/memb.o
+                0x0021135a                memb_init
  .text.memb_alloc
-                0x00211394       0x28 obj_openmote-cc2538/memb.o
-                0x00211394                memb_alloc
+                0x0021137a       0x28 obj_openmote-cc2538/memb.o
+                0x0021137a                memb_alloc
  .text.memb_free
-                0x002113bc       0x2c obj_openmote-cc2538/memb.o
-                0x002113bc                memb_free
+                0x002113a2       0x2c obj_openmote-cc2538/memb.o
+                0x002113a2                memb_free
  .text.memb_inmemb
-                0x002113e8       0x1c obj_openmote-cc2538/memb.o
-                0x002113e8                memb_inmemb
+                0x002113ce       0x1c obj_openmote-cc2538/memb.o
+                0x002113ce                memb_inmemb
  .text.memb_numfree
-                0x00211404       0x1c obj_openmote-cc2538/memb.o
-                0x00211404                memb_numfree
+                0x002113ea       0x1c obj_openmote-cc2538/memb.o
+                0x002113ea                memb_numfree
  .text.ringbuf_init
-                0x00211420        0xe obj_openmote-cc2538/ringbuf.o
-                0x00211420                ringbuf_init
+                0x00211406        0xe obj_openmote-cc2538/ringbuf.o
+                0x00211406                ringbuf_init
  .text.ringbuf_put
-                0x0021142e       0x28 obj_openmote-cc2538/ringbuf.o
-                0x0021142e                ringbuf_put
+                0x00211414       0x28 obj_openmote-cc2538/ringbuf.o
+                0x00211414                ringbuf_put
  .text.ringbuf_get
-                0x00211456       0x20 obj_openmote-cc2538/ringbuf.o
-                0x00211456                ringbuf_get
- .text.chksum   0x00211476       0x38 obj_openmote-cc2538/uip6.o
+                0x0021143c       0x20 obj_openmote-cc2538/ringbuf.o
+                0x0021143c                ringbuf_get
+ .text.chksum   0x0021145c       0x38 obj_openmote-cc2538/uip6.o
  .text.uip_icmp6chksum
-                0x002114ae        0x6 obj_openmote-cc2538/uip6.o
-                0x002114ae                uip_icmp6chksum
+                0x00211494        0x6 obj_openmote-cc2538/uip6.o
+                0x00211494                uip_icmp6chksum
  .text.uip_tcpchksum
-                0x002114b4        0x6 obj_openmote-cc2538/uip6.o
-                0x002114b4                uip_tcpchksum
+                0x0021149a        0x6 obj_openmote-cc2538/uip6.o
+                0x0021149a                uip_tcpchksum
  .text.uip_udpchksum
-                0x002114ba        0x6 obj_openmote-cc2538/uip6.o
-                0x002114ba                uip_udpchksum
+                0x002114a0        0x6 obj_openmote-cc2538/uip6.o
+                0x002114a0                uip_udpchksum
  .text.uip_htons
-                0x002114c0        0x6 obj_openmote-cc2538/uip6.o
-                0x002114c0                uip_htons
+                0x002114a6        0x6 obj_openmote-cc2538/uip6.o
+                0x002114a6                uip_htons
  .text.uip_htonl
-                0x002114c6       0x14 obj_openmote-cc2538/uip6.o
-                0x002114c6                uip_htonl
+                0x002114ac       0x14 obj_openmote-cc2538/uip6.o
+                0x002114ac                uip_htonl
  .text.uip_ds6_list_loop
-                0x002114da       0x48 obj_openmote-cc2538/uip-ds6.o
-                0x002114da                uip_ds6_list_loop
+                0x002114c0       0x48 obj_openmote-cc2538/uip-ds6.o
+                0x002114c0                uip_ds6_list_loop
  .text.uip_ds6_maddr_rm
-                0x00211522        0x8 obj_openmote-cc2538/uip-ds6.o
-                0x00211522                uip_ds6_maddr_rm
+                0x00211508        0x8 obj_openmote-cc2538/uip-ds6.o
+                0x00211508                uip_ds6_maddr_rm
  .text.uip_ds6_set_addr_iid
-                0x0021152a       0x12 obj_openmote-cc2538/uip-ds6.o
-                0x0021152a                uip_ds6_set_addr_iid
+                0x00211510       0x12 obj_openmote-cc2538/uip-ds6.o
+                0x00211510                uip_ds6_set_addr_iid
  .text.get_match_length
-                0x0021153c       0x3a obj_openmote-cc2538/uip-ds6.o
-                0x0021153c                get_match_length
+                0x00211522       0x3a obj_openmote-cc2538/uip-ds6.o
+                0x00211522                get_match_length
  .text.uip_ds6_nbr_ipaddr_from_lladdr
-                0x00211576        0x4 obj_openmote-cc2538/uip-ds6-nbr.o
-                0x00211576                uip_ds6_nbr_ipaddr_from_lladdr
+                0x0021155c        0x4 obj_openmote-cc2538/uip-ds6-nbr.o
+                0x0021155c                uip_ds6_nbr_ipaddr_from_lladdr
  .text.uip_ds6_nbr_lladdr_from_ipaddr
-                0x0021157a       0x12 obj_openmote-cc2538/uip-ds6-nbr.o
-                0x0021157a                uip_ds6_nbr_lladdr_from_ipaddr
+                0x00211560       0x12 obj_openmote-cc2538/uip-ds6-nbr.o
+                0x00211560                uip_ds6_nbr_lladdr_from_ipaddr
  .text.uip_ds6_nbr_refresh_reachable_state
-                0x0021158c       0x22 obj_openmote-cc2538/uip-ds6-nbr.o
-                0x0021158c                uip_ds6_nbr_refresh_reachable_state
+                0x00211572       0x22 obj_openmote-cc2538/uip-ds6-nbr.o
+                0x00211572                uip_ds6_nbr_refresh_reachable_state
  .text.uip_ds6_route_next
-                0x002115ae        0x8 obj_openmote-cc2538/uip-ds6-route.o
-                0x002115ae                uip_ds6_route_next
+                0x00211594        0x8 obj_openmote-cc2538/uip-ds6-route.o
+                0x00211594                uip_ds6_route_next
  .text.rm_routelist_callback
-                0x002115b6        0x4 obj_openmote-cc2538/uip-ds6-route.o
+                0x0021159c        0x4 obj_openmote-cc2538/uip-ds6-route.o
  .text.skip_name
-                0x002115ba       0x1a obj_openmote-cc2538/resolv.o
+                0x002115a0       0x1a obj_openmote-cc2538/resolv.o
  .text.encode_name
-                0x002115d4       0x32 obj_openmote-cc2538/resolv.o
+                0x002115ba       0x32 obj_openmote-cc2538/resolv.o
  .text.uiplib_ip6addrconv
-                0x00211606       0xb4 obj_openmote-cc2538/uiplib.o
-                0x00211606                uiplib_ip6addrconv
+                0x002115ec       0xb4 obj_openmote-cc2538/uiplib.o
+                0x002115ec                uiplib_ip6addrconv
  .text.uip_udp_packet_sendto
-                0x002116ba       0x50 obj_openmote-cc2538/uip-udp-packet.o
-                0x002116ba                uip_udp_packet_sendto
+                0x002116a0       0x50 obj_openmote-cc2538/uip-udp-packet.o
+                0x002116a0                uip_udp_packet_sendto
  .text.rpl_remove_routes
-                0x0021170a       0x1e obj_openmote-cc2538/rpl.o
-                0x0021170a                rpl_remove_routes
+                0x002116f0       0x1e obj_openmote-cc2538/rpl.o
+                0x002116f0                rpl_remove_routes
  .text.rpl_remove_routes_by_nexthop
-                0x00211728       0x30 obj_openmote-cc2538/rpl.o
-                0x00211728                rpl_remove_routes_by_nexthop
+                0x0021170e       0x30 obj_openmote-cc2538/rpl.o
+                0x0021170e                rpl_remove_routes_by_nexthop
  .text.rpl_add_route
-                0x00211758       0x36 obj_openmote-cc2538/rpl.o
-                0x00211758                rpl_add_route
+                0x0021173e       0x36 obj_openmote-cc2538/rpl.o
+                0x0021173e                rpl_add_route
  .text.lollipop_greater_than
-                0x0021178e       0x34 obj_openmote-cc2538/rpl-dag.o
+                0x00211774       0x34 obj_openmote-cc2538/rpl-dag.o
  .text.check_prefix
-                0x002117c2       0x58 obj_openmote-cc2538/rpl-dag.o
+                0x002117a8       0x58 obj_openmote-cc2538/rpl-dag.o
  .text.rpl_rank_via_parent
-                0x0021181a       0x1a obj_openmote-cc2538/rpl-dag.o
-                0x0021181a                rpl_rank_via_parent
+                0x00211800       0x1a obj_openmote-cc2538/rpl-dag.o
+                0x00211800                rpl_rank_via_parent
  .text.rpl_get_parent_ipaddr
-                0x00211834        0xe obj_openmote-cc2538/rpl-dag.o
-                0x00211834                rpl_get_parent_ipaddr
+                0x0021181a        0xe obj_openmote-cc2538/rpl-dag.o
+                0x0021181a                rpl_get_parent_ipaddr
  .text.rpl_get_parent_link_stats
-                0x00211842        0xe obj_openmote-cc2538/rpl-dag.o
-                0x00211842                rpl_get_parent_link_stats
+                0x00211828        0xe obj_openmote-cc2538/rpl-dag.o
+                0x00211828                rpl_get_parent_link_stats
  .text.rpl_parent_is_fresh
-                0x00211850        0xe obj_openmote-cc2538/rpl-dag.o
-                0x00211850                rpl_parent_is_fresh
+                0x00211836        0xe obj_openmote-cc2538/rpl-dag.o
+                0x00211836                rpl_parent_is_fresh
  .text.rpl_parent_is_reachable
-                0x0021185e       0x4a obj_openmote-cc2538/rpl-dag.o
-                0x0021185e                rpl_parent_is_reachable
+                0x00211844       0x4a obj_openmote-cc2538/rpl-dag.o
+                0x00211844                rpl_parent_is_reachable
  .text.rpl_set_prefix
-                0x002118a8       0x6c obj_openmote-cc2538/rpl-dag.o
-                0x002118a8                rpl_set_prefix
+                0x0021188e       0x6c obj_openmote-cc2538/rpl-dag.o
+                0x0021188e                rpl_set_prefix
  .text.rpl_set_default_route
-                0x00211914       0x30 obj_openmote-cc2538/rpl-dag.o
-                0x00211914                rpl_set_default_route
+                0x002118fa       0x30 obj_openmote-cc2538/rpl-dag.o
+                0x002118fa                rpl_set_default_route
  .text.rpl_find_parent
-                0x00211944       0x16 obj_openmote-cc2538/rpl-dag.o
-                0x00211944                rpl_find_parent
+                0x0021192a       0x16 obj_openmote-cc2538/rpl-dag.o
+                0x0021192a                rpl_find_parent
  .text.rpl_find_parent_any_dag
-                0x0021195a       0x1e obj_openmote-cc2538/rpl-dag.o
-                0x0021195a                rpl_find_parent_any_dag
+                0x00211940       0x1e obj_openmote-cc2538/rpl-dag.o
+                0x00211940                rpl_find_parent_any_dag
  .text.rpl_select_parent
-                0x00211978       0x4a obj_openmote-cc2538/rpl-dag.o
-                0x00211978                rpl_select_parent
+                0x0021195e       0x4a obj_openmote-cc2538/rpl-dag.o
+                0x0021195e                rpl_select_parent
  .text.rpl_select_dag
-                0x002119c2      0x15c obj_openmote-cc2538/rpl-dag.o
-                0x002119c2                rpl_select_dag
+                0x002119a8      0x15c obj_openmote-cc2538/rpl-dag.o
+                0x002119a8                rpl_select_dag
  .text.rpl_nullify_parent
-                0x00211b1e       0x54 obj_openmote-cc2538/rpl-dag.o
-                0x00211b1e                rpl_nullify_parent
+                0x00211b04       0x54 obj_openmote-cc2538/rpl-dag.o
+                0x00211b04                rpl_nullify_parent
  .text.nbr_callback
-                0x00211b72        0x4 obj_openmote-cc2538/rpl-dag.o
+                0x00211b58        0x4 obj_openmote-cc2538/rpl-dag.o
  .text.rpl_free_dag
-                0x00211b76       0x3a obj_openmote-cc2538/rpl-dag.o
-                0x00211b76                rpl_free_dag
+                0x00211b5c       0x3a obj_openmote-cc2538/rpl-dag.o
+                0x00211b5c                rpl_free_dag
  .text.rpl_move_parent
-                0x00211bb0       0x54 obj_openmote-cc2538/rpl-dag.o
-                0x00211bb0                rpl_move_parent
+                0x00211b96       0x54 obj_openmote-cc2538/rpl-dag.o
+                0x00211b96                rpl_move_parent
  .text.rpl_repair_root
-                0x00211c04       0x48 obj_openmote-cc2538/rpl-dag.o
-                0x00211c04                rpl_repair_root
+                0x00211bea       0x48 obj_openmote-cc2538/rpl-dag.o
+                0x00211bea                rpl_repair_root
  .text.rpl_alloc_dag
-                0x00211c4c       0x48 obj_openmote-cc2538/rpl-dag.o
-                0x00211c4c                rpl_alloc_dag
+                0x00211c32       0x48 obj_openmote-cc2538/rpl-dag.o
+                0x00211c32                rpl_alloc_dag
  .text.rpl_process_parent_event
-                0x00211c94       0x96 obj_openmote-cc2538/rpl-dag.o
-                0x00211c94                rpl_process_parent_event
+                0x00211c7a       0x96 obj_openmote-cc2538/rpl-dag.o
+                0x00211c7a                rpl_process_parent_event
  .text.rpl_add_dag
-                0x00211d2a      0x112 obj_openmote-cc2538/rpl-dag.o
-                0x00211d2a                rpl_add_dag
+                0x00211d10      0x112 obj_openmote-cc2538/rpl-dag.o
+                0x00211d10                rpl_add_dag
  .text.rpl_process_dio
-                0x00211e3c      0x2e6 obj_openmote-cc2538/rpl-dag.o
-                0x00211e3c                rpl_process_dio
- .text.get32    0x00212122       0x18 obj_openmote-cc2538/rpl-icmp6.o
- .text.set32    0x0021213a       0x12 obj_openmote-cc2538/rpl-icmp6.o
- .text.get16    0x0021214c        0xc obj_openmote-cc2538/rpl-icmp6.o
- .text.set16    0x00212158        0xa obj_openmote-cc2538/rpl-icmp6.o
+                0x00211e22      0x2e6 obj_openmote-cc2538/rpl-dag.o
+                0x00211e22                rpl_process_dio
+ .text.get32    0x00212108       0x18 obj_openmote-cc2538/rpl-icmp6.o
+ .text.set32    0x00212120       0x12 obj_openmote-cc2538/rpl-icmp6.o
+ .text.get16    0x00212132        0xc obj_openmote-cc2538/rpl-icmp6.o
+ .text.set16    0x0021213e        0xa obj_openmote-cc2538/rpl-icmp6.o
  .text.rpl_icmp6_update_nbr_table
-                0x00212162       0x2e obj_openmote-cc2538/rpl-icmp6.o
-                0x00212162                rpl_icmp6_update_nbr_table
- .text.reset    0x00212190        0x2 obj_openmote-cc2538/rpl-mrhof.o
+                0x00212148       0x2e obj_openmote-cc2538/rpl-icmp6.o
+                0x00212148                rpl_icmp6_update_nbr_table
+ .text.reset    0x00212176        0x2 obj_openmote-cc2538/rpl-mrhof.o
  .text.update_metric_container
-                0x00212192        0x6 obj_openmote-cc2538/rpl-mrhof.o
+                0x00212178        0x6 obj_openmote-cc2538/rpl-mrhof.o
  .text.parent_link_metric
-                0x00212198       0x12 obj_openmote-cc2538/rpl-mrhof.o
+                0x0021217e       0x12 obj_openmote-cc2538/rpl-mrhof.o
  .text.parent_has_usable_link
-                0x002121aa       0x12 obj_openmote-cc2538/rpl-mrhof.o
+                0x00212190       0x12 obj_openmote-cc2538/rpl-mrhof.o
  .text.best_dag
-                0x002121bc       0x2c obj_openmote-cc2538/rpl-mrhof.o
+                0x002121a2       0x2c obj_openmote-cc2538/rpl-mrhof.o
  .text.parent_path_cost
-                0x002121e8       0x34 obj_openmote-cc2538/rpl-mrhof.o
+                0x002121ce       0x34 obj_openmote-cc2538/rpl-mrhof.o
  .text.parent_is_acceptable
-                0x0021221c       0x26 obj_openmote-cc2538/rpl-mrhof.o
+                0x00212202       0x26 obj_openmote-cc2538/rpl-mrhof.o
  .text.rank_via_parent
-                0x00212242       0x34 obj_openmote-cc2538/rpl-mrhof.o
+                0x00212228       0x34 obj_openmote-cc2538/rpl-mrhof.o
  .text.best_parent
-                0x00212276       0x68 obj_openmote-cc2538/rpl-mrhof.o
+                0x0021225c       0x68 obj_openmote-cc2538/rpl-mrhof.o
  .text.handle_unicast_dio_timer
-                0x002122de       0x1c obj_openmote-cc2538/rpl-timers.o
+                0x002122c4       0x1c obj_openmote-cc2538/rpl-timers.o
  .text.rpl_reset_dio_timer
-                0x002122fa       0x1c obj_openmote-cc2538/rpl-timers.o
-                0x002122fa                rpl_reset_dio_timer
+                0x002122e0       0x1c obj_openmote-cc2538/rpl-timers.o
+                0x002122e0                rpl_reset_dio_timer
  .text.rpl_schedule_dao
-                0x00212316        0x8 obj_openmote-cc2538/rpl-timers.o
-                0x00212316                rpl_schedule_dao
+                0x002122fc        0x8 obj_openmote-cc2538/rpl-timers.o
+                0x002122fc                rpl_schedule_dao
  .text.get_probing_delay
-                0x0021231e       0x3a obj_openmote-cc2538/rpl-timers.o
-                0x0021231e                get_probing_delay
+                0x00212304       0x3a obj_openmote-cc2538/rpl-timers.o
+                0x00212304                get_probing_delay
  .text.handle_probing_timer
-                0x00212358       0x32 obj_openmote-cc2538/rpl-timers.o
+                0x0021233e       0x32 obj_openmote-cc2538/rpl-timers.o
  .text.svcall_handler
-                0x0021238a       0x1e obj_openmote-cc2538/mtarch.o
-                0x0021238a                svcall_handler
+                0x00212370       0x1e obj_openmote-cc2538/mtarch.o
+                0x00212370                svcall_handler
  .text.pendsv_handler
-                0x002123a8       0x18 obj_openmote-cc2538/mtarch.o
-                0x002123a8                pendsv_handler
+                0x0021238e       0x18 obj_openmote-cc2538/mtarch.o
+                0x0021238e                pendsv_handler
  .text.linkaddr_copy
-                0x002123c0        0xa obj_openmote-cc2538/linkaddr.o
-                0x002123c0                linkaddr_copy
+                0x002123a6        0xa obj_openmote-cc2538/linkaddr.o
+                0x002123a6                linkaddr_copy
  .text.linkaddr_cmp
-                0x002123ca       0x10 obj_openmote-cc2538/linkaddr.o
-                0x002123ca                linkaddr_cmp
+                0x002123b0       0x10 obj_openmote-cc2538/linkaddr.o
+                0x002123b0                linkaddr_cmp
  .text.link_stats_is_fresh
-                0x002123da       0x24 obj_openmote-cc2538/link-stats.o
-                0x002123da                link_stats_is_fresh
+                0x002123c0       0x24 obj_openmote-cc2538/link-stats.o
+                0x002123c0                link_stats_is_fresh
  .text.item_from_key
-                0x002123fe       0x22 obj_openmote-cc2538/nbr-table.o
+                0x002123e4       0x22 obj_openmote-cc2538/nbr-table.o
  .text.nbr_set_bit
-                0x00212420       0x38 obj_openmote-cc2538/nbr-table.o
+                0x00212406       0x38 obj_openmote-cc2538/nbr-table.o
  .text.nbr_table_next
-                0x00212458       0x3e obj_openmote-cc2538/nbr-table.o
-                0x00212458                nbr_table_next
+                0x0021243e       0x3e obj_openmote-cc2538/nbr-table.o
+                0x0021243e                nbr_table_next
  .text.nbr_table_get_from_lladdr
-                0x00212496       0x32 obj_openmote-cc2538/nbr-table.o
-                0x00212496                nbr_table_get_from_lladdr
+                0x0021247c       0x32 obj_openmote-cc2538/nbr-table.o
+                0x0021247c                nbr_table_get_from_lladdr
  .text.nbr_table_get_lladdr
-                0x002124c8       0x20 obj_openmote-cc2538/nbr-table.o
-                0x002124c8                nbr_table_get_lladdr
+                0x002124ae       0x20 obj_openmote-cc2538/nbr-table.o
+                0x002124ae                nbr_table_get_lladdr
  .text.nbr_table_update_lladdr
-                0x002124e8       0x40 obj_openmote-cc2538/nbr-table.o
-                0x002124e8                nbr_table_update_lladdr
+                0x002124ce       0x40 obj_openmote-cc2538/nbr-table.o
+                0x002124ce                nbr_table_update_lladdr
  .text.queuebuf_update_attr_from_packetbuf
-                0x00212528        0xc obj_openmote-cc2538/queuebuf.o
-                0x00212528                queuebuf_update_attr_from_packetbuf
+                0x0021250e        0xc obj_openmote-cc2538/queuebuf.o
+                0x0021250e                queuebuf_update_attr_from_packetbuf
  .text.queuebuf_update_from_packetbuf
-                0x00212534       0x1c obj_openmote-cc2538/queuebuf.o
-                0x00212534                queuebuf_update_from_packetbuf
+                0x0021251a       0x1c obj_openmote-cc2538/queuebuf.o
+                0x0021251a                queuebuf_update_from_packetbuf
  .text.queuebuf_attr
-                0x00212550        0xc obj_openmote-cc2538/queuebuf.o
-                0x00212550                queuebuf_attr
+                0x00212536        0xc obj_openmote-cc2538/queuebuf.o
+                0x00212536                queuebuf_attr
  .text.packet_sent
-                0x0021255c       0xca obj_openmote-cc2538/csma.o
+                0x00212542       0xca obj_openmote-cc2538/csma.o
  .text.frame802154_has_panid
-                0x00212626       0xb0 obj_openmote-cc2538/frame802154.o
-                0x00212626                frame802154_has_panid
+                0x0021260c       0xb0 obj_openmote-cc2538/frame802154.o
+                0x0021260c                frame802154_has_panid
  .text.field_len
-                0x002126d6       0x84 obj_openmote-cc2538/frame802154.o
+                0x002126bc       0x84 obj_openmote-cc2538/frame802154.o
  .text.frame802154_is_broadcast_addr
-                0x0021275a       0x1e obj_openmote-cc2538/frame802154.o
-                0x0021275a                frame802154_is_broadcast_addr
+                0x00212740       0x1e obj_openmote-cc2538/frame802154.o
+                0x00212740                frame802154_is_broadcast_addr
  .text.frame802154_hdrlen
-                0x00212778       0x32 obj_openmote-cc2538/frame802154.o
-                0x00212778                frame802154_hdrlen
+                0x0021275e       0x32 obj_openmote-cc2538/frame802154.o
+                0x0021275e                frame802154_hdrlen
  .text.frame802154_create_fcf
-                0x002127aa       0x62 obj_openmote-cc2538/frame802154.o
-                0x002127aa                frame802154_create_fcf
+                0x00212790       0x62 obj_openmote-cc2538/frame802154.o
+                0x00212790                frame802154_create_fcf
  .text.frame802154_create
-                0x0021280c       0x92 obj_openmote-cc2538/frame802154.o
-                0x0021280c                frame802154_create
+                0x002127f2       0x92 obj_openmote-cc2538/frame802154.o
+                0x002127f2                frame802154_create
  .text.frame802154_parse_fcf
-                0x0021289e       0x40 obj_openmote-cc2538/frame802154.o
-                0x0021289e                frame802154_parse_fcf
- .text.parse    0x002128de       0x94 obj_openmote-cc2538/framer-802154.o
- .text.create   0x00212972        0x6 obj_openmote-cc2538/framer-802154.o
+                0x00212884       0x40 obj_openmote-cc2538/frame802154.o
+                0x00212884                frame802154_parse_fcf
+ .text.parse    0x002128c4       0x94 obj_openmote-cc2538/framer-802154.o
+ .text.create   0x00212958        0x6 obj_openmote-cc2538/framer-802154.o
  .text.hdr_length
-                0x00212978        0x6 obj_openmote-cc2538/framer-802154.o
+                0x0021295e        0x6 obj_openmote-cc2538/framer-802154.o
  .text.mac_call_sent_callback
-                0x0021297e       0x16 obj_openmote-cc2538/mac.o
-                0x0021297e                mac_call_sent_callback
+                0x00212964       0x16 obj_openmote-cc2538/mac.o
+                0x00212964                mac_call_sent_callback
  .text.duty_cycle
-                0x00212994        0x4 obj_openmote-cc2538/contikimac.o
+                0x0021297a        0x4 obj_openmote-cc2538/contikimac.o
  .text.qsend_packet
-                0x00212998       0x22 obj_openmote-cc2538/contikimac.o
- .text.init     0x002129ba        0x2 obj_openmote-cc2538/nullsec.o
+                0x0021297e       0x22 obj_openmote-cc2538/contikimac.o
+ .text.init     0x002129a0        0x2 obj_openmote-cc2538/nullsec.o
  .text.send_to_peer
-                0x002129bc       0x46 dtls-client.co
+                0x002129a2       0x46 dtls-client.co
  *(SORT(.rodata*))
- *fill*         0x00212a02        0x2 00000000
  .rodata.CSWTCH.136
-                0x00212a04       0x54 obj_openmote-cc2538/dtls.o
- .rodata.rcon   0x00212a58       0x28 obj_openmote-cc2538/rijndael.o
- .rodata.Te0    0x00212a80      0x400 obj_openmote-cc2538/rijndael.o
- .rodata.Te1    0x00212e80      0x400 obj_openmote-cc2538/rijndael.o
- .rodata.Te2    0x00213280      0x400 obj_openmote-cc2538/rijndael.o
- .rodata.Te3    0x00213680      0x400 obj_openmote-cc2538/rijndael.o
- .rodata.Te4    0x00213a80      0x400 obj_openmote-cc2538/rijndael.o
+                0x002129e8       0x54 obj_openmote-cc2538/dtls.o
+ .rodata.rcon   0x00212a3c       0x28 obj_openmote-cc2538/rijndael.o
+ .rodata.Te0    0x00212a64      0x400 obj_openmote-cc2538/rijndael.o
+ .rodata.Te1    0x00212e64      0x400 obj_openmote-cc2538/rijndael.o
+ .rodata.Te2    0x00213264      0x400 obj_openmote-cc2538/rijndael.o
+ .rodata.Te3    0x00213664      0x400 obj_openmote-cc2538/rijndael.o
+ .rodata.Te4    0x00213a64      0x400 obj_openmote-cc2538/rijndael.o
  .rodata.sha256_initial_hash_value
-                0x00213e80       0x20 obj_openmote-cc2538/sha2.o
- .rodata.K256   0x00213ea0      0x100 obj_openmote-cc2538/sha2.o
+                0x00213e64       0x20 obj_openmote-cc2538/sha2.o
+ .rodata.K256   0x00213e84      0x100 obj_openmote-cc2538/sha2.o
  .rodata.loglevels
-                0x00213fa0       0x1c obj_openmote-cc2538/debug.o
+                0x00213f84       0x1c obj_openmote-cc2538/debug.o
  .rodata.button_sensor
-                0x00213fbc       0x10 obj_openmote-cc2538/button-sensor.o
-                0x00213fbc                button_sensor
+                0x00213fa0       0x10 obj_openmote-cc2538/button-sensor.o
+                0x00213fa0                button_sensor
  .rodata.uart_regs
-                0x00213fcc       0x58 obj_openmote-cc2538/uart.o
+                0x00213fb0       0x58 obj_openmote-cc2538/uart.o
  .rodata.reset_cause.5159
-                0x00214024       0x10 obj_openmote-cc2538/sys-ctrl.o
+                0x00214008       0x10 obj_openmote-cc2538/sys-ctrl.o
  .rodata.output_power
-                0x00214034       0x70 obj_openmote-cc2538/cc2538-rf.o
+                0x00214018       0x70 obj_openmote-cc2538/cc2538-rf.o
  .rodata.cc2538_rf_driver
-                0x002140a4       0x38 obj_openmote-cc2538/cc2538-rf.o
-                0x002140a4                cc2538_rf_driver
+                0x00214088       0x38 obj_openmote-cc2538/cc2538-rf.o
+                0x00214088                cc2538_rf_driver
  .rodata.cc2538_temp_sensor
-                0x002140dc       0x10 obj_openmote-cc2538/cc2538-temp-sensor.o
-                0x002140dc                cc2538_temp_sensor
+                0x002140c0       0x10 obj_openmote-cc2538/cc2538-temp-sensor.o
+                0x002140c0                cc2538_temp_sensor
  .rodata.sicslowpan_driver
-                0x002140ec        0xc obj_openmote-cc2538/sicslowpan.o
-                0x002140ec                sicslowpan_driver
+                0x002140d0        0xc obj_openmote-cc2538/sicslowpan.o
+                0x002140d0                sicslowpan_driver
  .rodata.csma_driver
-                0x002140f8       0x1c obj_openmote-cc2538/csma.o
-                0x002140f8                csma_driver
+                0x002140dc       0x1c obj_openmote-cc2538/csma.o
+                0x002140dc                csma_driver
  .rodata.framer_802154
-                0x00214114        0xc obj_openmote-cc2538/framer-802154.o
-                0x00214114                framer_802154
+                0x002140f8        0xc obj_openmote-cc2538/framer-802154.o
+                0x002140f8                framer_802154
  .rodata.contikimac_driver
-                0x00214120       0x20 obj_openmote-cc2538/contikimac.o
-                0x00214120                contikimac_driver
+                0x00214104       0x20 obj_openmote-cc2538/contikimac.o
+                0x00214104                contikimac_driver
  .rodata.nullsec_driver
-                0x00214140       0x10 obj_openmote-cc2538/nullsec.o
-                0x00214140                nullsec_driver
+                0x00214124       0x10 obj_openmote-cc2538/nullsec.o
+                0x00214124                nullsec_driver
  .rodata.autostart_processes
-                0x00214150        0xc dtls-client.co
-                0x00214150                autostart_processes
+                0x00214134        0xc dtls-client.co
+                0x00214134                autostart_processes
  .rodata._ctype_
-                0x0021415c      0x101 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-ctype_.o)
-                0x0021415c                _ctype_
- *fill*         0x0021425d        0x1 00000000
+                0x00214140      0x101 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-ctype_.o)
+                0x00214140                _ctype_
+ *fill*         0x00214241        0x1 00000000
  .rodata.nsec_record.7083
-                0x0021425e       0x12 obj_openmote-cc2538/resolv.o
+                0x00214242       0x12 obj_openmote-cc2538/resolv.o
  .rodata.resolv_mdns_addr
-                0x00214270       0x10 obj_openmote-cc2538/resolv.o
+                0x00214254       0x10 obj_openmote-cc2538/resolv.o
  .rodata.prf_label_server
-                0x00214280        0x7 obj_openmote-cc2538/dtls.o
+                0x00214264        0x7 obj_openmote-cc2538/dtls.o
  .rodata.prf_label_master
-                0x00214287        0xe obj_openmote-cc2538/dtls.o
+                0x0021426b        0xe obj_openmote-cc2538/dtls.o
  .rodata.prf_label_finished
-                0x00214295        0xa obj_openmote-cc2538/dtls.o
+                0x00214279        0xa obj_openmote-cc2538/dtls.o
  .rodata.str1.1
-                0x0021429f     0x1055 obj_openmote-cc2538/dtls.o
+                0x00214283     0x1055 obj_openmote-cc2538/dtls.o
                                0x1067 (size before relaxing)
  .rodata.prf_label_client
-                0x002152f4        0x7 obj_openmote-cc2538/dtls.o
+                0x002152d8        0x7 obj_openmote-cc2538/dtls.o
  .rodata.prf_label_key
-                0x002152fb        0xe obj_openmote-cc2538/dtls.o
+                0x002152df        0xe obj_openmote-cc2538/dtls.o
  .rodata.str1.1
-                0x00215309       0xab obj_openmote-cc2538/tinydtls-crypto.o
+                0x002152ed       0xab obj_openmote-cc2538/tinydtls-crypto.o
  .rodata.str1.1
-                0x002153b4       0x21 obj_openmote-cc2538/hmac.o
+                0x00215398       0x21 obj_openmote-cc2538/hmac.o
  .rodata.str1.1
-                0x002153d5       0x37 obj_openmote-cc2538/netq.o
+                0x002153b9       0x37 obj_openmote-cc2538/netq.o
  .rodata.str1.1
-                0x0021540c        0xe obj_openmote-cc2538/peer.o
+                0x002153f0        0xe obj_openmote-cc2538/peer.o
  .rodata.str1.1
-                0x0021541a       0x24 obj_openmote-cc2538/session.o
+                0x002153fe       0x24 obj_openmote-cc2538/session.o
  .rodata.str1.1
-                0x0021543e       0x29 obj_openmote-cc2538/tinydtls-ccm.o
+                0x00215422       0x29 obj_openmote-cc2538/tinydtls-ccm.o
  .rodata.str1.1
-                0x00215467       0x37 obj_openmote-cc2538/sha2.o
+                0x0021544b       0x37 obj_openmote-cc2538/sha2.o
  .rodata.str1.1
-                0x0021549e       0x8b obj_openmote-cc2538/debug.o
+                0x00215482       0x8b obj_openmote-cc2538/debug.o
  .rodata.str1.1
-                0x00215529       0x60 obj_openmote-cc2538/contiki-main.o
+                0x0021550d       0x60 obj_openmote-cc2538/contiki-main.o
                                  0x66 (size before relaxing)
  .rodata.str1.1
-                0x00215589        0x7 obj_openmote-cc2538/button-sensor.o
+                0x0021556d        0x7 obj_openmote-cc2538/button-sensor.o
  .rodata.str1.1
-                0x00215590       0x94 obj_openmote-cc2538/soc.o
+                0x00215574       0x94 obj_openmote-cc2538/soc.o
  .rodata.str1.1
-                0x00215624       0x2d obj_openmote-cc2538/sys-ctrl.o
+                0x00215608       0x2d obj_openmote-cc2538/sys-ctrl.o
  .rodata.str1.1
-                0x00215651       0x11 obj_openmote-cc2538/cc2538-rf.o
+                0x00215635       0x11 obj_openmote-cc2538/cc2538-rf.o
  .rodata.str1.1
-                0x00215662       0x14 obj_openmote-cc2538/cc2538-temp-sensor.o
+                0x00215646       0x14 obj_openmote-cc2538/cc2538-temp-sensor.o
  .rodata.buffer.4159
-                0x00215676       0x10 obj_openmote-cc2538/strformat.o
+                0x0021565a       0x10 obj_openmote-cc2538/strformat.o
  .rodata.str1.1
-                0x00215686       0x13 obj_openmote-cc2538/strformat.o
+                0x0021566a       0x13 obj_openmote-cc2538/strformat.o
                                  0x37 (size before relaxing)
  .rodata.buffer.4150
-                0x00215699       0x10 obj_openmote-cc2538/strformat.o
+                0x0021567d       0x10 obj_openmote-cc2538/strformat.o
  .rodata.str1.1
-                0x002156a9        0xf obj_openmote-cc2538/ctimer.o
+                0x0021568d        0xf obj_openmote-cc2538/ctimer.o
  .rodata.str1.1
-                0x002156b8        0xc obj_openmote-cc2538/etimer.o
+                0x0021569c        0xc obj_openmote-cc2538/etimer.o
  .rodata.str1.1
-                0x002156c4        0xe obj_openmote-cc2538/serial-line.o
+                0x002156a8        0xe obj_openmote-cc2538/serial-line.o
  .rodata.str1.1
-                0x002156d2       0x25 obj_openmote-cc2538/assert.o
+                0x002156b6       0x25 obj_openmote-cc2538/assert.o
  .rodata.str1.1
-                0x002156f7        0x8 obj_openmote-cc2538/sensors.o
- .rodata        0x002156ff        0x2 obj_openmote-cc2538/sicslowpan.o
+                0x002156db        0x8 obj_openmote-cc2538/sensors.o
+ .rodata        0x002156e3        0x2 obj_openmote-cc2538/sicslowpan.o
  .rodata.ttl_values
-                0x00215701        0x4 obj_openmote-cc2538/sicslowpan.o
+                0x002156e5        0x4 obj_openmote-cc2538/sicslowpan.o
  .rodata.unc_llconf
-                0x00215705        0x4 obj_openmote-cc2538/sicslowpan.o
-                0x00215705                unc_llconf
+                0x002156e9        0x4 obj_openmote-cc2538/sicslowpan.o
+                0x002156e9                unc_llconf
  .rodata.llprefix
-                0x00215709        0x2 obj_openmote-cc2538/sicslowpan.o
-                0x00215709                llprefix
+                0x002156ed        0x2 obj_openmote-cc2538/sicslowpan.o
+                0x002156ed                llprefix
  .rodata.unc_mxconf
-                0x0021570b        0x4 obj_openmote-cc2538/sicslowpan.o
-                0x0021570b                unc_mxconf
+                0x002156ef        0x4 obj_openmote-cc2538/sicslowpan.o
+                0x002156ef                unc_mxconf
  .rodata.str1.1
-                0x0021570f        0xb obj_openmote-cc2538/sicslowpan.o
+                0x002156f3        0xb obj_openmote-cc2538/sicslowpan.o
  .rodata.unc_ctxconf
-                0x0021571a        0x4 obj_openmote-cc2538/sicslowpan.o
-                0x0021571a                unc_ctxconf
+                0x002156fe        0x4 obj_openmote-cc2538/sicslowpan.o
+                0x002156fe                unc_ctxconf
  .rodata.str1.1
-                0x0021571e       0x20 obj_openmote-cc2538/resolv.o
+                0x00215702       0x20 obj_openmote-cc2538/resolv.o
                                  0x2d (size before relaxing)
  .rodata.str1.1
-                0x0021573e        0xd obj_openmote-cc2538/tcpip.o
+                0x00215722        0xd obj_openmote-cc2538/tcpip.o
  .rodata.str1.1
-                0x0021574b       0x28 obj_openmote-cc2538/uip-debug.o
+                0x0021572f       0x28 obj_openmote-cc2538/uip-debug.o
  .rodata.linkaddr_null
-                0x00215773        0x8 obj_openmote-cc2538/linkaddr.o
-                0x00215773                linkaddr_null
+                0x00215757        0x8 obj_openmote-cc2538/linkaddr.o
+                0x00215757                linkaddr_null
  .rodata.str1.1
-                0x0021577b        0x5 obj_openmote-cc2538/csma.o
+                0x0021575f        0x5 obj_openmote-cc2538/csma.o
  .rodata.str1.1
-                0x00215780        0xb obj_openmote-cc2538/contikimac.o
+                0x00215764        0xb obj_openmote-cc2538/contikimac.o
  .rodata.str1.1
-                0x0021578b        0x8 obj_openmote-cc2538/nullsec.o
- .rodata        0x00215793       0x1e dtls-client.co
+                0x0021576f        0x8 obj_openmote-cc2538/nullsec.o
+ .rodata        0x00215777       0x1e dtls-client.co
  .rodata.str1.1
-                0x002157b1      0x337 dtls-client.co
+                0x00215795      0x337 dtls-client.co
                                 0x33c (size before relaxing)
-                0x00215ae8                _etext = .
+                0x00215acc                _etext = .
 
-.glue_7         0x00215ae8        0x0
+.glue_7         0x00215acc        0x0
  .glue_7        0x00000000        0x0 linker stubs
 
-.glue_7t        0x00215ae8        0x0
+.glue_7t        0x00215acc        0x0
  .glue_7t       0x00000000        0x0 linker stubs
 
-.vfp11_veneer   0x00215ae8        0x0
+.vfp11_veneer   0x00215acc        0x0
  .vfp11_veneer  0x00000000        0x0 linker stubs
 
-.v4_bx          0x00215ae8        0x0
+.v4_bx          0x00215acc        0x0
  .v4_bx         0x00000000        0x0 linker stubs
 
-.iplt           0x00215ae8        0x0
+.iplt           0x00215acc        0x0
  .iplt          0x00000000        0x0 obj_openmote-cc2538/startup-gcc.o
 
 .socdata        0x20000000       0x40
@@ -4250,7 +4249,7 @@ END GROUP
  .udma_channel_control_table
                 0x20000000       0x40 obj_openmote-cc2538/udma.o
 
-.data           0x20000040      0x28e load address 0x00215ae8
+.data           0x20000040      0x28e load address 0x00215acc
                 0x20000040                _data = .
  *(SORT(.data*))
  .data.dtls_retransmit_process
@@ -4368,15 +4367,15 @@ END GROUP
  .data.status.9501
                 0x200002cd        0x1 dtls-client.co
                 0x200002ce                _edata = .
-                0x00215ae8                _ldata = LOADADDR (.data)
+                0x00215acc                _ldata = LOADADDR (.data)
 
-.igot.plt       0x200002d0        0x0 load address 0x00215d76
+.igot.plt       0x200002d0        0x0 load address 0x00215d5a
  .igot.plt      0x00000000        0x0 obj_openmote-cc2538/startup-gcc.o
 
-.ARM.exidx      0x00215d78        0x8
+.ARM.exidx      0x00215d5c        0x8
  *(SORT(.ARM.exidx*))
- .ARM.exidx     0x00215d78        0x8 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_divdi3.o)
- .ARM.exidx     0x00215d80        0x0 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_udivdi3.o)
+ .ARM.exidx     0x00215d5c        0x8 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_divdi3.o)
+ .ARM.exidx     0x00215d64        0x0 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_udivdi3.o)
                                   0x8 (size before relaxing)
 
 .bss            0x200002d0     0x3b81

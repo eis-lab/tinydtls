@@ -63,7 +63,7 @@ int packet_count = 27;
 int it;
 static int rtimer_count =0;
 static int rtimer_count2 =0;
-static int num = 1;
+static int num = 3;
 #define CFS_READ_MACRO(fd_read, read_buf, size) total = 0;                                                                                                                              \
                                                 while (1) {                                                                                                                             \
                                                     n = cfs_read(fd_read, read_buf + total,size - total);                                                                               \

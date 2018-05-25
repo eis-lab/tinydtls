@@ -110,7 +110,7 @@ Discarded input sections
  .text.dtls_check_retransmit
                 0x00000000       0x3e obj_openmote-cc2538/dtls.o
  .text.change_sequence
-                0x00000000       0x32 obj_openmote-cc2538/dtls.o
+                0x00000000       0x1c obj_openmote-cc2538/dtls.o
  .text          0x00000000        0x0 obj_openmote-cc2538/tinydtls-crypto.o
  .data          0x00000000        0x0 obj_openmote-cc2538/tinydtls-crypto.o
  .bss           0x00000000        0x0 obj_openmote-cc2538/tinydtls-crypto.o
