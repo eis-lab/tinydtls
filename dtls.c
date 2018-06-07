@@ -129,6 +129,7 @@
   }
 
 /* some constants for the PRF */
+#define CUSTOM_PRF 1 // USE CUSTOM PRF!!
 #define PRF_LABEL(Label) prf_label_##Label
 #define PRF_LABEL_SIZE(Label) (sizeof(PRF_LABEL(Label)) - 1)
 static const unsigned char prf_label_master[] = "master secret";
@@ -726,12 +727,21 @@ calculate_key_block(dtls_context_t *ctx,
   dtls_debug_dump("server_random", handshake->tmp.random.server, DTLS_RANDOM_LENGTH);
   dtls_debug_dump("pre_master_secret", pre_master_secret, pre_master_len);
 
-  dtls_prf(pre_master_secret, pre_master_len,
-	   PRF_LABEL(master), PRF_LABEL_SIZE(master),
-	   handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
-	   handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
-	   master_secret,
-	   DTLS_MASTER_SECRET_LENGTH);
+  #ifdef CUSTOM_PRF
+    dtls_prf_custom(pre_master_secret, pre_master_len,
+             PRF_LABEL(master), PRF_LABEL_SIZE(master),
+             handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
+             handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
+             master_secret,
+             DTLS_MASTER_SECRET_LENGTH);
+  #else
+    dtls_prf(pre_master_secret, pre_master_len,
+             PRF_LABEL(master), PRF_LABEL_SIZE(master),
+             handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
+             handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
+             master_secret,
+             DTLS_MASTER_SECRET_LENGTH);
+  #endif /*CUSTOM_PRF*/
 
   dtls_debug_dump("master_secret", master_secret, DTLS_MASTER_SECRET_LENGTH);
 
@@ -739,13 +749,23 @@ calculate_key_block(dtls_context_t *ctx,
    * key_block = PRF(master_secret,
                     "key expansion" + tmp.random.server + tmp.random.client) */
 
-  dtls_prf(master_secret,
-	   DTLS_MASTER_SECRET_LENGTH,
-	   PRF_LABEL(key), PRF_LABEL_SIZE(key),
-	   handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
-	   handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
-	   security->key_block,
-	   dtls_kb_size(security, role));
+  #ifdef CUSTOM_PRF
+    dtls_prf_custom(master_secret,
+            DTLS_MASTER_SECRET_LENGTH,
+            PRF_LABEL(key), PRF_LABEL_SIZE(key),
+            handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
+            handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
+            security->key_block,
+            dtls_kb_size(security, role));
+  #else
+    dtls_prf(master_secret,
+            DTLS_MASTER_SECRET_LENGTH,
+            PRF_LABEL(key), PRF_LABEL_SIZE(key),
+            handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
+            handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
+            security->key_block,
+            dtls_kb_size(security, role));
+  #endif /*CUSTOM_PRF*/
 
   memcpy(handshake->tmp.master_secret, master_secret, DTLS_MASTER_SECRET_LENGTH);
   dtls_debug_keyblock(security);
@@ -1240,12 +1260,22 @@ check_finished(dtls_context_t *ctx, dtls_peer_t *peer,
     label_size = PRF_LABEL_SIZE(client);
   }
 
-  dtls_prf(peer->handshake_params->tmp.master_secret,
-	   DTLS_MASTER_SECRET_LENGTH,
-	   label, label_size,
-	   PRF_LABEL(finished), PRF_LABEL_SIZE(finished),
-	   buf, digest_length,
-	   b.verify_data, sizeof(b.verify_data));
+  #ifdef CUSTOM_PRF
+    dtls_prf_custom(peer->handshake_params->tmp.master_secret,
+             DTLS_MASTER_SECRET_LENGTH,
+             label, label_size,
+             PRF_LABEL(finished), PRF_LABEL_SIZE(finished),
+             buf, digest_length,
+             b.verify_data, sizeof(b.verify_data));
+
+  #else
+    dtls_prf(peer->handshake_params->tmp.master_secret,
+  	   DTLS_MASTER_SECRET_LENGTH,
+  	   label, label_size,
+  	   PRF_LABEL(finished), PRF_LABEL_SIZE(finished),
+  	   buf, digest_length,
+  	   b.verify_data, sizeof(b.verify_data));
+  #endif /*CUSTOM_PRF*/
 
   dtls_debug_dump("d:", data + DTLS_HS_LENGTH, sizeof(b.verify_data));
   dtls_debug_dump("v:", b.verify_data, sizeof(b.verify_data));
@@ -1390,7 +1420,8 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
     memcpy(nonce, dtls_kb_local_iv(security, peer->role),
 	   dtls_kb_iv_size(security, peer->role));
     memcpy(nonce + dtls_kb_iv_size(security, peer->role), start, 8); /* epoch + seq_num */
-
+    dtls_debug_dump("iv", dtls_kb_local_iv(security, peer->role), 4);
+    dtls_debug_dump("epoch+seq:", start, 8);
     dtls_debug_dump("nonce:", nonce, DTLS_CCM_BLOCKSIZE);
     dtls_debug_dump("key:", dtls_kb_local_write_key(security, peer->role),
 		    dtls_kb_key_size(security, peer->role));
@@ -1415,7 +1446,7 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
     powertrace_print("END ENCRYPT");
 #endif
     rtimer_c = rtimer_arch_now() - rtimer_c;
-    printf("rtimer_c :%d\n",rtimer_c);
+    printf("encrypt time measurments :%d\n\n",rtimer_c);
     if (res < 0)
       return res;
 
@@ -1631,8 +1662,9 @@ dtls_prepare_record_x(dtls_peer_t *peer, dtls_security_parameters_t *security,
     memcpy(nonce, dtls_kb_local_iv(security, peer->role),
 	   dtls_kb_iv_size(security, peer->role));
     memcpy(nonce + dtls_kb_iv_size(security, peer->role), start, 8); /* epoch + seq_num */
-
-  //  dtls_debug_dump("nonce:", nonce, DTLS_CCM_BLOCKSIZE);
+    //dtls_debug_dump("..iv", dtls_kb_local_iv(security, peer->role), 4);
+    //dtls_debug_dump("..epoch+seq:", start, 8);
+    //dtls_debug_dump("..nonce:", nonce, DTLS_CCM_BLOCKSIZE);
   //  dtls_debug_dump("key:", dtls_kb_local_write_key(security, peer->role),
 	//	    dtls_kb_key_size(security, peer->role));
 
@@ -1661,7 +1693,7 @@ dtls_prepare_record_x(dtls_peer_t *peer, dtls_security_parameters_t *security,
       return res;
 
     res += 8;			/* increment res by size of nonce_explicit */
-    dtls_debug_dump("message:", start, res);
+  //  dtls_debug_dump("message:", start, res);
   }
 
   /* fix length of fragment in sendbuf */
@@ -2832,12 +2864,22 @@ dtls_send_finished(dtls_context_t *ctx, dtls_peer_t *peer,
 
   length = dtls_hash_finalize(hash, &hs_hash);
 
-  dtls_prf(peer->handshake_params->tmp.master_secret,
-	   DTLS_MASTER_SECRET_LENGTH,
-	   label, labellen,
-	   PRF_LABEL(finished), PRF_LABEL_SIZE(finished),
-	   hash, length,
-	   p, DTLS_FIN_LENGTH);
+  #ifdef CUSTOM_PRF
+    dtls_prf_custom(peer->handshake_params->tmp.master_secret,
+             DTLS_MASTER_SECRET_LENGTH,
+             label, labellen,
+             PRF_LABEL(finished), PRF_LABEL_SIZE(finished),
+             hash, length,
+             p, DTLS_FIN_LENGTH);
+
+  #else
+    dtls_prf(peer->handshake_params->tmp.master_secret,
+  	   DTLS_MASTER_SECRET_LENGTH,
+  	   label, labellen,
+  	   PRF_LABEL(finished), PRF_LABEL_SIZE(finished),
+  	   hash, length,
+  	   p, DTLS_FIN_LENGTH);
+  #endif /*CUSTOM_PRF*/
 
   dtls_debug_dump("server finished MAC", p, DTLS_FIN_LENGTH);
 
@@ -3628,6 +3670,8 @@ decrypt_verify(dtls_peer_t *peer, uint8 *packet, size_t length,
     /* read epoch and seq_num from message */
     //DTLS_IV_SIZE = 4
     memcpy(nonce + dtls_kb_iv_size(security, peer->role), *cleartext, 8);
+    dtls_debug_dump("...iv", dtls_kb_remote_iv(security, peer->role), 4);
+    dtls_debug_dump("...epoch+seq:", *cleartext, 8);
     *cleartext += 8;
     clen -= 8;
 

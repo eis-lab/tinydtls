@@ -63,7 +63,7 @@ int packet_count = 27;
 int it;
 static int rtimer_count =0;
 static int rtimer_count2 =0;
-static int num = 3;
+static int num = 2;
 #define CFS_READ_MACRO(fd_read, read_buf, size) total = 0;                                                                                                                              \
                                                 while (1) {                                                                                                                             \
                                                     n = cfs_read(fd_read, read_buf + total,size - total);                                                                               \
@@ -153,7 +153,7 @@ read_from_peer(struct dtls_context_t *ctx,
   printf("\n\nread_from_peer func!\nreceived packet: ");
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
-    rtimer_count = rtimer_arch_now();
+  rtimer_count = rtimer_arch_now();
   int r = cfs_read(fd, &sendbuf, sizeof(sendbuf));
 
   if(r == 0) {
@@ -171,13 +171,13 @@ read_from_peer(struct dtls_context_t *ctx,
   field[1] = value & 0xff;
   return 2;
 }*/
-  dtls_debug_dump("sendbuf 1:", sendbuf, 21);
-  change_sequence(sendbuf,num);
-  num++;
+  //dtls_debug_dump("sendbuf 1:", sendbuf, 21);
+  //change_sequence(sendbuf,num);
+  //num++;
   //dtls_record_header_t *header = DTLS_RECORD_HEADER(sendbuf);
   //dtls_int_to_uint8(sendbuf+10, 0x03);
-  dtls_debug_dump("sendbuf 2:", sendbuf, 21);
-  printf("cfs_Read res:%d\n",r);
+  //dtls_debug_dump("sendbuf 2:", sendbuf, 21);
+  //printf("cfs_Read res:%d\n",r);
   //rtimer_count2 = rtimer_arch_now() - rtimer_count;
   //printf("cfs_read rtimer_count:%d\n",rtimer_count2);
 
@@ -432,7 +432,7 @@ cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
   int i;
   int fd = cfs_open(FILENAME,CFS_WRITE);
 
-  for(i=0; i < 10; i++){
+  for(i=0; i < 1; i++){
     memset(msg,0,payload);
     sprintf(msg, "data : %d\n",i);
     strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);

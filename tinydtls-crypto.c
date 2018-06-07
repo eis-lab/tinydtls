@@ -284,6 +284,28 @@ dtls_prf(const unsigned char *key, size_t keylen,
 		     buf, buflen);
 }
 
+size_t
+dtls_prf_custom(const unsigned char *key, size_t keylen,
+	 const unsigned char *label, size_t labellen,
+	 const unsigned char *random1, size_t random1len,
+	 const unsigned char *random2, size_t random2len,
+	 unsigned char *buf, size_t buflen) {
+
+  /* Clear the result buffer */
+  memset(buf, 0, buflen);
+  const unsigned char num1[] = "12345";
+  const unsigned char num2[] = "6789";
+  size_t num1len = sizeof(num1);
+  size_t num2len = sizeof(num2);
+
+  return dtls_p_hash(HASH_SHA256,
+                     key, keylen,
+                     label, labellen,
+                     num1, num1len,
+                     num2, num2len,
+                     buf, buflen);
+}
+
 void
 dtls_mac(dtls_hmac_context_t *hmac_ctx,
 	 const unsigned char *record,
@@ -551,6 +573,7 @@ dtls_encrypt(const unsigned char *src, size_t length,
 {
 #ifdef CC2538DK_AES
     dtls_debug("Using hardware cryptoprocessor for AES-CCM\n");
+    printf("\nhardware encryption\n"); //test
     crypto_enable();
 
     /* Initialize the key variables */
@@ -590,6 +613,7 @@ dtls_encrypt(const unsigned char *src, size_t length,
     crypto_disable();
     return aes_status;
 #else
+  //printf("\nsoftware encryption\n"); //test
   int ret;
   struct dtls_cipher_context_t *ctx = dtls_cipher_context_get();
 
