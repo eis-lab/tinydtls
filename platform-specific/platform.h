@@ -20,7 +20,7 @@
 
 #ifndef DTLS_HANDSHAKE_MAX
 /** The maximum number of concurrent DTLS handshakes. */
-#  define DTLS_HANDSHAKE_MAX 1
+#  define DTLS_HANDSHAKE_MAX 10
 #endif
 
 #ifndef DTLS_SECURITY_MAX
