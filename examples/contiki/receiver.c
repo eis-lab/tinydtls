@@ -54,7 +54,7 @@
 char cfs_buf[payload];
 char read_buf[300];
 char *filename;
-int fd;
+
 int iterator;
 int data_len;
 unsigned char iv[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -136,7 +136,7 @@ AUTOSTART_PROCESSES(&resolv_process,&udp_client_process);
 /*---------------------------------------------------------------------------*/
 static void
 try_send(struct dtls_context_t *ctx, session_t *dst) {
-  printf("try_send func!!\n");
+
   int res;
   res = dtls_write(ctx, dst, (uint8 *)buf, buflen);
   if (res >= 0) {
@@ -153,42 +153,18 @@ read_from_peer(struct dtls_context_t *ctx,
   printf("\n\nread_from_peer func!\nreceived packet: ");
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
+
   rtimer_count = rtimer_arch_now();
-  int r = cfs_read(fd, &sendbuf, sizeof(sendbuf));
 
-  if(r == 0) {
-    printf("r is 0\n");
-    cfs_close(fd);
-    return 0;
-  } else if(r < sizeof(sendbuf)) {
-    printf("close cfs\n");
-    cfs_close(fd);
-    return 0;
-  }
-/*  static inline int dtls_int_to_uint16(unsigned char *field, uint16_t value)
-{
-  field[0] = (value >> 8) & 0xff;
-  field[1] = value & 0xff;
-  return 2;
-}*/
-  //dtls_debug_dump("sendbuf 1:", sendbuf, 21);
-  //change_sequence(sendbuf,num);
-  //num++;
-  //dtls_record_header_t *header = DTLS_RECORD_HEADER(sendbuf);
-  //dtls_int_to_uint8(sendbuf+10, 0x03);
-  //dtls_debug_dump("sendbuf 2:", sendbuf, 21);
-  //printf("cfs_Read res:%d\n",r);
-  //rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  //printf("cfs_read rtimer_count:%d\n",rtimer_count2);
 
-  //dtls_write(ctx,session,(uint8 *)sendbuf,sizeof(sendbuf));    //using unecrypted data
   struct uip_udp_conn *conn = (struct uip_udp_conn *)dtls_get_app_data(ctx);
 
   uip_ipaddr_copy(&conn->ripaddr, &session->addr);
 
   conn->rport = UIP_HTONS(3000);
 
-  uip_udp_packet_send(conn, sendbuf, sizeof(sendbuf));
+  //request the data
+  //uip_udp_packet_send(conn, sendbuf, sizeof(sendbuf));
 
   /* Restore server connection to allow data from any node */
   /* FIXME: do we want this at all? */
@@ -202,29 +178,12 @@ read_from_peer(struct dtls_context_t *ctx,
 
 /*-----------------------------------------------------------*/
 static char buf2[MAX_PAYLOAD_LEN];
-static void
-timeout_handler(void)
-{
-  static int seq_id;
-
-  //printf("Client sending to: ");
-  //PRINT6ADDR(&client_conn->ripaddr);
-  sprintf(buf2, "Hello %d from the client", ++seq_id);
-  //printf(" (msg: %s)\n", buf2);
-#if SEND_TOO_LARGE_PACKET_TO_TEST_FRAGMENTATION
-  uip_udp_packet_send(client_conn, buf2, UIP_APPDATA_SIZE);
-#else /* SEND_TOO_LARGE_PACKET_TO_TEST_FRAGMENTATION */
-  uip_udp_packet_send(client_conn, buf2, strlen(buf2));
-#endif /* SEND_TOO_LARGE_PACKET_TO_TEST_FRAGMENTATION */
-}
 
 /*-----------------------------------------------------------*/
 static int
 send_to_peer(struct dtls_context_t *ctx,
              session_t *session, uint8 *data, size_t len) {
 
-  //rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  //printf("dtls_encrypt rtimer_count:%d\n",rtimer_count2);
   struct uip_udp_conn *conn = (struct uip_udp_conn *)dtls_get_app_data(ctx);
 
   uip_ipaddr_copy(&conn->ripaddr, &session->addr);
@@ -241,19 +200,7 @@ send_to_peer(struct dtls_context_t *ctx,
 
   return len;
 }
-static int
-cfs_save_dtls(struct dtls_context_t *ctx,
-             session_t *session, uint8 *data, size_t len){
 
-      int fd2 = cfs_open(FILENAME2,CFS_WRITE);
-          if(fd >= 0){
-            int res = cfs_write(fd2,data,len);
-            printf("cfs_write_res: %d, len:%d\n",res,len);
-          } else{
-            printf("\ncfs_file_open error!\n");
-          }
-      cfs_close(fd2);
-}
 #ifdef DTLS_PSK
 static unsigned char psk_id[PSK_ID_MAXLEN] = PSK_DEFAULT_IDENTITY;
 static size_t psk_id_length = sizeof(PSK_DEFAULT_IDENTITY) - 1;
@@ -334,24 +281,20 @@ static void
 dtls_handle_read(dtls_context_t *ctx) {
   session_t session;
   memset(&session, 0, sizeof(session_t));
-  PRINTF("dtls_handle_read!\n");
+
   if(uip_newdata()) {
     uip_ipaddr_copy(&session.addr, &UIP_IP_BUF->srcipaddr);
     session.port = UIP_UDP_BUF->srcport;
     session.size = sizeof(session.addr) + sizeof(session.port);
 
     ((char *)uip_appdata)[uip_datalen()] = 0;
-    PRINTF("Client received message from ");
+    PRINTF("receiver received message from ");
     PRINT6ADDR(&session.addr);
     PRINTF(":%d\n", uip_ntohs(session.port));
 
     dtls_handle_message(ctx, &session, uip_appdata, uip_datalen());
   }
 }
-/*---------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------*/
-
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -382,13 +325,14 @@ set_global_address(void)
   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
 }
 #endif /* UIP_CONF_ROUTER */
+
 /*---------------------------------------------------------------------------*/
 static resolv_status_t
 set_connection_address(uip_ipaddr_t *ipaddr)
 {
 #ifndef UDP_CONNECTION_ADDR
 #if RESOLV_CONF_SUPPORTS_MDNS
-#define UDP_CONNECTION_ADDR       contiki-udp-server.local
+#define UDP_CONNECTION_ADDR       sensor.local
 #elif UIP_CONF_ROUTER
 #define UDP_CONNECTION_ADDR       aaaa:0:0:0:0212:7404:0004:0404
 #else
@@ -424,48 +368,14 @@ set_connection_address(uip_ipaddr_t *ipaddr)
   return status;
 }
 
-void
-cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
-
-  char msg[payload];
-  char sendbuf[250];
-  int i;
-  int fd = cfs_open(FILENAME,CFS_WRITE);
-
-  for(i=0; i < 1; i++){
-    memset(msg,0,payload);
-    sprintf(msg, "data : %d\n",i);
-    strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);
-    cfs_buf[sizeof(cfs_buf)-1] = '\0';
-    
-    int res = dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
-        //printf("dtls_encrypt_data res:%d\n",res);
-        if(fd >= 0){
-          int res = cfs_write(fd,sendbuf,sizeof(sendbuf));
-          printf("cfs_write_res: %d, sendbuf_size:%d\n",res,sizeof(sendbuf));
-        } else{
-          printf("\ncfs_file_open error!\n");
-        }
-  }
-  cfs_close(fd);
-  fd = cfs_open(FILENAME,CFS_READ);
-
-}
-
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
 
   if(msg_type == DTLS_EVENT_CONNECTED){
-    cfs_prepare_data(ctx,session);
 	  connected = 1;
-    char buf[30] = "start\n";
+    char buf[40] = "reciever send a data request!\n";
     dtls_write(ctx, session, (uint8 *)buf, sizeof(buf));
-
-  } else if (msg_type == DTLS_EVENT_CONNECT){
-
   }
-
-  return 0;
 }
 
 void
@@ -489,8 +399,7 @@ init_dtls(session_t *dst) {
   dst->size = sizeof(dst->addr) + sizeof(dst->port);
   dst->port = UIP_HTONS(3000);
 
-  //set_connection_address(&dst->addr);
-  //client_conn = udp_new(&dst->addr, 0, NULL);
+
   client_conn = udp_new(&dst->addr, dst->port, NULL);
   udp_bind(client_conn, UIP_HTONS(3001));
 
@@ -510,20 +419,16 @@ init_dtls(session_t *dst) {
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_client_process, ev, data)
 {
-  //static int connected = 0;
-  static session_t dst;
 
-  static struct etimer et;
+  static session_t dst;
   uip_ipaddr_t ipaddr;
 
   PROCESS_BEGIN();
-  PRINTF("UDP client process started\n");
+  PRINTF("receiver process started\n");
 
-
-#if UIP_CONF_ROUTER
-  printf("set global address test\n");
-  set_global_address();
-#endif
+  #if UIP_CONF_ROUTER
+    set_global_address();
+  #endif
 
   dtls_init();
 
@@ -543,31 +448,17 @@ PROCESS_THREAD(udp_client_process, ev, data)
   dst.addr = ipaddr;
   init_dtls(&dst);
   serial_line_init();
-  PRINTF("Created a connection with the server ");
+  PRINTF("Created a connection with the sensor");
   PRINT6ADDR(&client_conn->ripaddr);
   PRINTF(" local/remote port %u/%u\n",
 	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
-
-
 
   dtls_connect(dtls_context, &dst);
   while(1) {
     PROCESS_YIELD();
 
     if(ev == tcpip_event){
-
-      printf("\nClient tcpip_event!!\n\n");
       dtls_handle_read(dtls_context);
-    }
-    /*if (connected){
-      printf("\nconnected and send packet\n");
-    }*/
-    if (buflen) {
-      if (!connected) {
-	       connected = dtls_connect(dtls_context, &dst) >= 0;
-      }
-      printf("connected: %d\n",connected);
-      if(connected) try_send(dtls_context, &dst);
     }
   }
 

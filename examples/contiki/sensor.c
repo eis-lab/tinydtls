@@ -55,12 +55,19 @@
 #define UIP_UDP_BUF  ((struct uip_udp_hdr *)&uip_buf[UIP_LLIPH_LEN])
 
 #define MAX_PAYLOAD_LEN 120
+#define fusion fusion_DTLS
 
 static int connected = 0;
 static struct uip_udp_conn *server_conn;
 static int rtimer_count = 0;
 static int rtimer_count2 = 0;
 static dtls_context_t *dtls_context;
+int fd;
+
+#include "cfs-coffee.h"
+#define FILENAME "test"
+#define payload 30
+char cfs_buf[payload];
 
 static const unsigned char ecdsa_priv_key[] = {
                         0xD9, 0xE2, 0x70, 0x7A, 0x72, 0xDA, 0x6A, 0x05,
@@ -86,25 +93,38 @@ AUTOSTART_PROCESSES(&resolv_process,&udp_server_process);
 static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
-  printf("read from peer func!\n");
+  printf("\nread from peer func!\n");
   size_t i;
   for (i = 0; i < len; i++)
     PRINTF("%c", data[i]);
-  char buf[30] = "data request\n";
 
-  if(connected) {
-    rtimer_count = rtimer_arch_now();
-    connected = 0;
-    printf("\ndata request send!!\n");
-    dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
+  char sendbuf[250];
+
+  rtimer_count = rtimer_arch_now();
+
+  int r = cfs_read(fd, &sendbuf, sizeof(sendbuf));
+  if(r == 0) {
+    printf("r is 0\n");
+    cfs_close(fd);
+    return 0;
+  } else if(r < sizeof(sendbuf)) {
+    printf("close cfs\n");
+    cfs_close(fd);
     return 0;
   }
 
+  struct uip_udp_conn *conn = (struct uip_udp_conn *)dtls_get_app_data(ctx);
+  uip_ipaddr_copy(&conn->ripaddr, &session->addr);
+  conn->rport = UIP_HTONS(3001);
+  uip_udp_packet_send(conn, sendbuf, sizeof(sendbuf));
+
+  /* Restore server connection to allow data from any node */
+  /* FIXME: do we want this at all? */
+  memset(&conn->ripaddr, 0, sizeof(conn->ripaddr));
+  memset(&conn->rport, 0, sizeof(conn->rport));
+
   rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  rtimer_count = rtimer_arch_now();
-  printf("\nrtimer_count:%d\n\n",rtimer_count2);
-  printf("\ndata request send!!\n");
-  dtls_write(dtls_context,session,(uint8 *)buf,sizeof(buf));
+  printf("dtls_send rtimer_count:%d\n",rtimer_count2);
   return 0;
 }
 
@@ -202,29 +222,7 @@ verify_ecdsa_key(struct dtls_context_t *ctx,
 }
 #endif /* DTLS_ECC */
 
-/*
-static void
-tcpip_handler(void)
-{
-  static int seq_id;
-  char buf[MAX_PAYLOAD_LEN];
 
-  if(uip_newdata()) {
-    ((char *)uip_appdata)[uip_datalen()] = 0;
-    PRINTF("Server received: '%s' from ", (char *)uip_appdata);
-    PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
-    PRINTF("\n");
-
-    uip_ipaddr_copy(&server_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
-    PRINTF("Responding with message: ");
-    sprintf(buf, "Hello from the server! (%d)", ++seq_id);
-    PRINTF("%s\n", buf);
-
-    uip_udp_packet_send(server_conn, buf, strlen(buf));
-    // Restore server connection to allow data from any node
-    memset(&server_conn->ripaddr, 0, sizeof(server_conn->ripaddr));
-  }
-}*/
 /*---------------------------------------------------------------------------*/
 static void
 print_local_addresses(void)
@@ -255,28 +253,54 @@ dtls_handle_read(dtls_context_t *ctx) {
     session.port = UIP_UDP_BUF->srcport;
     session.size = sizeof(session.addr) + sizeof(session.port);
 
-    PRINTF("server: received from ");
+    PRINTF("sensor: received from ");
     PRINT6ADDR(&(session.addr));
     PRINTF(" :%d\n",uip_ntohs(session.port));
 
     dtls_handle_message(ctx, &session, uip_appdata, uip_datalen());
   }
 }
+
+void
+cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
+
+  char msg[payload];
+  char sendbuf[250];
+  int i;
+  fd = cfs_open(FILENAME,CFS_WRITE);
+
+  for(i=0; i < 1; i++){
+    memset(msg,0,payload);
+    sprintf(msg, "data : %d\n",i);
+    strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);
+    cfs_buf[sizeof(cfs_buf)-1] = '\0';
+
+    #ifdef fusion
+    int res = dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
+    printf("dtls_encrypt_data res:%d\n",res);
+    #endif
+
+    if(fd >= 0){
+        int res = cfs_write(fd,sendbuf,sizeof(sendbuf));
+        printf("cfs_write_res: %d, sendbuf_size:%d\n",res,sizeof(sendbuf));
+    } else{
+        printf("\ncfs_file_open error!\n");
+    }
+  }
+  cfs_close(fd);
+  fd = cfs_open(FILENAME,CFS_READ);
+}
+
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
   if(msg_type == DTLS_EVENT_CONNECTED){
-
-	connected = 1;
-	printf("dtls_connected!\n\n");
-
-  } else if (msg_type == DTLS_EVENT_CONNECT){
-  	//printf("\ndtls_event_connect\n\n");
-  } else{
-	//printf("\ndtls complete func!\n\n");
+    printf("dtls_connected!\n\n");
+    cfs_prepare_data(ctx,session);
+	  connected = 1;
   }
-
   return 0;
 }
+
 void
 init_dtls() {
   static dtls_handler_t cb = {
@@ -304,27 +328,26 @@ init_dtls() {
     dtls_set_handler(dtls_context, &cb);
 }
 
-//PROCESS(udp_server_process, "UDP server process");
-//AUTOSTART_PROCESSES(&udp_server_process);
+
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_server_process, ev, data)
 {
-#if UIP_CONF_ROUTER
-  uip_ipaddr_t ipaddr;
-#endif /* UIP_CONF_ROUTER */
+  #if UIP_CONF_ROUTER
+   uip_ipaddr_t ipaddr;
+  #endif /* UIP_CONF_ROUTER */
 
   PROCESS_BEGIN();
-  PRINTF("UDP server started\n");
+  PRINTF("sensor started\n");
 
-#if RESOLV_CONF_SUPPORTS_MDNS
-  resolv_set_hostname("contiki-udp-server");
-#endif
+  #if RESOLV_CONF_SUPPORTS_MDNS
+   resolv_set_hostname("sensor");
+  #endif
 
-#if UIP_CONF_ROUTER
-  uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
-  uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
-  uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
-#endif /* UIP_CONF_ROUTER */
+  #if UIP_CONF_ROUTER
+   uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
+   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
+   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
+  #endif /* UIP_CONF_ROUTER */
 
   dtls_init();
   init_dtls();
@@ -335,11 +358,11 @@ PROCESS_THREAD(udp_server_process, ev, data)
   }
 
   print_local_addresses();
-  int send_request = 1;
+
   while(1) {
     PROCESS_YIELD();
     if(ev == tcpip_event) {
-      printf("\nserver recieved a message!!\n"); //test
+
       dtls_handle_read(dtls_context);
     }
   }

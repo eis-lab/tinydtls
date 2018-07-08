@@ -2,6 +2,7 @@
 # platform-specific options
 
 CFLAGS += -DUIP_CONF_ND6_SEND_NS=1
+#CFLAGS += -DCC2538DK_AES=1
 
 ifeq ($(TARGET), econotag)
 CFLAGS += -DUIP_CONF_TCP=0
