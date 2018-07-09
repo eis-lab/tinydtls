@@ -63,7 +63,7 @@ static int rtimer_count = 0;
 static int rtimer_count2 = 0;
 static dtls_context_t *dtls_context;
 int fd;
-
+int receiver_num = 0;
 #include "cfs-coffee.h"
 #define FILENAME "test"
 #define payload 30
@@ -294,9 +294,12 @@ cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
   if(msg_type == DTLS_EVENT_CONNECTED){
+    receiver_num++;
     printf("dtls_connected!\n\n");
-    cfs_prepare_data(ctx,session);
-	  connected = 1;
+    if(receiver_num ==1){
+    	 cfs_prepare_data(ctx,session);
+	 connected = 1;
+    }
   }
   return 0;
 }

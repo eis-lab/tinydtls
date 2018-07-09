@@ -427,7 +427,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
   PRINTF("receiver process started\n");
 
   #if UIP_CONF_ROUTER
-    resolv_set_hostname("receiver");
+    resolv_set_hostname("receiver3");
     set_global_address();
   #endif
 
