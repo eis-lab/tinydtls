@@ -26,6 +26,8 @@
  * This file is part of the Contiki operating system.
  *
  */
+#define UIP_MCAST6_CONF_ENGINE UIP_MCAST6_ENGINE_ROLL_TM
+#include "net/ipv6/multicast/uip-mcast6.h"
 
 #include "contiki.h"
 #include "contiki-lib.h"
@@ -52,7 +54,7 @@
 #define FILENAME2 "test2"
 #define payload 30
 char cfs_buf[payload];
-char read_buf[300];
+char read_buf[200];
 char *filename;
 
 int iterator;
@@ -64,6 +66,7 @@ int it;
 static int rtimer_count =0;
 static int rtimer_count2 =0;
 static int num = 2;
+int handshake_complete = 0;
 #define CFS_READ_MACRO(fd_read, read_buf, size) total = 0;                                                                                                                              \
                                                 while (1) {                                                                                                                             \
                                                     n = cfs_read(fd_read, read_buf + total,size - total);                                                                               \
@@ -108,6 +111,8 @@ static int num = 2;
 #define MAX_PAYLOAD_LEN		120
 
 static struct uip_udp_conn *client_conn;
+static struct uip_udp_conn *sink_conn;
+
 static dtls_context_t *dtls_context;
 static char buf[200];
 static size_t buflen = 0;
@@ -132,7 +137,7 @@ static const unsigned char ecdsa_pub_key_y[] = {
 
 /*---------------------------------------------------------------------------*/
 PROCESS(udp_client_process, "UDP client process");
-AUTOSTART_PROCESSES(&resolv_process,&udp_client_process);
+AUTOSTART_PROCESSES(&udp_client_process);
 /*---------------------------------------------------------------------------*/
 static void
 try_send(struct dtls_context_t *ctx, session_t *dst) {
@@ -372,9 +377,9 @@ static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
 
   if(msg_type == DTLS_EVENT_CONNECTED){
-	  connected = 1;
-    char buf[40] = "reciever send a data request!\n";
-    dtls_write(ctx, session, (uint8 *)buf, sizeof(buf));
+	handshake_complete = 1;
+    //char buf[40] = "reciever send a data request!\n";
+    //dtls_write(ctx, session, (uint8 *)buf, sizeof(buf));
   }
 }
 
@@ -415,51 +420,81 @@ init_dtls(session_t *dst) {
     dtls_set_handler(dtls_context, &cb);
 }
 
+static uip_ds6_maddr_t *
+join_mcast_group(void)
+{
+  uip_ipaddr_t addr;
+  uip_ds6_maddr_t *rv;
+
+  /* First, set our v6 global */
+  uip_ip6addr(&addr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
+  uip_ds6_set_addr_iid(&addr, &uip_lladdr);
+  uip_ds6_addr_add(&addr, 0, ADDR_AUTOCONF);
+
+  /*
+   * IPHC will use stateless multicast compression for this destination
+   * (M=1, DAC=0), with 32 inline bits (1E 89 AB CD)
+   */
+  uip_ip6addr(&addr, 0xFF1E,0,0,0,0,0,0x89,0xABCD);
+  rv = uip_ds6_maddr_add(&addr);
+
+  if(rv) {
+    PRINTF("Joined multicast group ");
+    PRINT6ADDR(&uip_ds6_maddr_lookup(&addr)->ipaddr);
+    PRINTF("\n");
+  }
+  return rv;
+}
+
+void dtls_reqeust(session_t * dst)
+{  
+  if(uip_newdata()){
+    printf("uip_newdata\n");
+    uip_ipaddr_copy(&(dst->addr), &UIP_IP_BUF->srcipaddr);
+    //dst->addr = UIP_IP_BUF -> srcipaddr;
+  }
+}
+
 
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_client_process, ev, data)
 {
-
+  
   static session_t dst;
   uip_ipaddr_t ipaddr;
 
   PROCESS_BEGIN();
   PRINTF("receiver process started\n");
 
-  #if UIP_CONF_ROUTER
-    resolv_set_hostname("receiver");
-    set_global_address();
-  #endif
-
   dtls_init();
+  //init_dtls(&dst);
+  serial_line_init();
 
-  static resolv_status_t status = RESOLV_STATUS_UNCACHED;
-  while(status != RESOLV_STATUS_CACHED) {
-    status = set_connection_address(&ipaddr);
-
-    if(status == RESOLV_STATUS_RESOLVING) {
-      PROCESS_WAIT_EVENT_UNTIL(ev == resolv_event_found);
-    } else if(status != RESOLV_STATUS_CACHED) {
-      PRINTF("Can't get connection address.\n");
-      PROCESS_YIELD();
-    }
+  //dtls_connect(dtls_context, &dst);
+  
+  if(join_mcast_group() == NULL ){
+        PRINTF("Failed to join multicast group\n");
+        PROCESS_EXIT();
   }
 
-  /* new connection with remote host */
-  dst.addr = ipaddr;
-  init_dtls(&dst);
-  serial_line_init();
-  PRINTF("Created a connection with the sensor");
-  PRINT6ADDR(&client_conn->ripaddr);
-  PRINTF(" local/remote port %u/%u\n",
-	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
+  sink_conn = udp_new(NULL, UIP_HTONS(0),NULL);
+  udp_bind(sink_conn, UIP_HTONS(3001));
 
-  dtls_connect(dtls_context, &dst);
+  PRINTF("Listening: ");
+  PRINT6ADDR(&sink_conn->ripaddr);
+  PRINTF(" local/remote port %u/%u\n",
+        UIP_HTONS(sink_conn->lport), UIP_HTONS(sink_conn->rport));
+
   while(1) {
     PROCESS_YIELD();
-
     if(ev == tcpip_event){
-      dtls_handle_read(dtls_context);
+      if(connected == 0){
+      	dtls_reqeust(&dst);
+	connected = 1;	
+	init_dtls(&dst);
+	dtls_connect(dtls_context, &dst);	
+      }
+      else if (handshake_complete) dtls_handle_read(dtls_context);
     }
   }
 

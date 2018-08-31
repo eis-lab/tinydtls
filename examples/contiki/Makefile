@@ -24,14 +24,14 @@ VERSION:=0.8.2
 SHELL = /bin/sh
 MKDIR = mkdir
 
-abs_builddir = /home/user/merge/contiki/apps/tinydtls/examples/contiki
+abs_builddir = /home/user/contiki/apps/tinydtls/examples/contiki
 top_builddir = ../..
 top_srcdir:= ../..
-DISTDIR=$(top_builddir)/tinydtls-0.8.2
+DISTDIR=$(top_builddir)/tinydtls
 DTLS_SOURCES:=dtls-server.c dtls-client.c
 FILES:=Makefile.in $(DTLS_SOURCES)
 
-all: dtls-server dtls-client
+all: dtls-server dtls-client sensor receiver
 	$(MAKE) $(MAKEFLAGS) ROLE=server dtls-server
 	$(MAKE) $(MAKEFLAGS) clean
 	$(MAKE) $(MAKEFLAGS) ROLE=client dtls-client
@@ -40,6 +40,7 @@ CONTIKI=$(top_srcdir)/../..
 
 WITH_UIP6=1
 UIP_CONF_IPV6=1
+MODULES += core/net/ipv6/multicast
 
 ifneq ($(ROLE),client)
 	CFLAGS+= -DHARD_CODED_ADDRESS=\"aaaa::02:232\"
@@ -64,3 +65,5 @@ dist:	$(FILES)
 ifeq ("1", "1")
 include $(CONTIKI)/Makefile.include
 endif
+
+

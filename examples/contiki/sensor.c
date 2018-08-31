@@ -26,6 +26,8 @@
  * This file is part of the Contiki operating system.
  *
  */
+#define UIP_MCAST6_CONF_ENGINE UIP_MCAST6_ENGINE_ROLL_TM
+#include "net/ipv6/multicast/uip-mcast6.h"
 
 #include "contiki.h"
 #include "contiki-lib.h"
@@ -34,7 +36,7 @@
 #if UIP_CONF_IPV6_RPL
 #include "net/rpl/rpl.h"
 #endif
-
+#include "cfs-coffee.h"
 #include <string.h>
 #include "tinydtls.h"
 
@@ -58,7 +60,10 @@
 #define fusion fusion_DTLS
 
 static int connected = 0;
+
 static struct uip_udp_conn *server_conn;
+static struct uip_udp_conn *mcast_conn;
+
 static int rtimer_count = 0;
 static int rtimer_count2 = 0;
 static dtls_context_t *dtls_context;
@@ -88,7 +93,7 @@ static const unsigned char ecdsa_pub_key_y[] = {
                         0x17, 0xDE, 0x43, 0xF9, 0xF9, 0xAD, 0xEE, 0x70};
 
 PROCESS(udp_server_process, "UDP server process");
-AUTOSTART_PROCESSES(&resolv_process,&udp_server_process);
+AUTOSTART_PROCESSES(&udp_server_process);
 /*---------------------------------------------------------------------------*/
 static int
 read_from_peer(struct dtls_context_t *ctx,
@@ -296,9 +301,14 @@ dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned sh
   if(msg_type == DTLS_EVENT_CONNECTED){
     receiver_num++;
     printf("dtls_connected!\n\n");
+
     if(receiver_num ==1){
     	 cfs_prepare_data(ctx,session);
 	 connected = 1;
+    }
+
+    if(receiver_num == 2){
+	
     }
   }
   return 0;
@@ -319,8 +329,6 @@ init_dtls() {
 #endif /* DTLS_ECC */
   };
 
-  PRINTF("DTLS server started\n");
-
   server_conn = udp_new(NULL, UIP_HTONS(3001), NULL);
   udp_bind(server_conn, UIP_HTONS(3000));
 
@@ -329,6 +337,14 @@ init_dtls() {
   dtls_context = dtls_new_context(server_conn);
   if (dtls_context)
     dtls_set_handler(dtls_context, &cb);
+}
+
+static void
+prepare_mcast(void)
+{
+  uip_ipaddr_t ipaddr;
+  uip_ip6addr(&ipaddr, 0xFF1E,0,0,0,0,0,0x89,0xABCD);
+  mcast_conn = udp_new(&ipaddr,UIP_HTONS(3001),NULL);
 }
 
 
@@ -342,15 +358,16 @@ PROCESS_THREAD(udp_server_process, ev, data)
   PROCESS_BEGIN();
   PRINTF("sensor started\n");
 
-  #if RESOLV_CONF_SUPPORTS_MDNS
+  /*#if RESOLV_CONF_SUPPORTS_MDNS
    resolv_set_hostname("sensor");
-  #endif
+  #endif*/
 
-  #if UIP_CONF_ROUTER
+  /*#if UIP_CONF_ROUTER
    uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
    uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
    uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
-  #endif /* UIP_CONF_ROUTER */
+  #endif*/ /* UIP_CONF_ROUTER */
+  prepare_mcast();
 
   dtls_init();
   init_dtls();
@@ -360,14 +377,24 @@ PROCESS_THREAD(udp_server_process, ev, data)
     PROCESS_EXIT();
   }
 
-  print_local_addresses();
+  //print_local_addresses();
+  char m_buf[30] = "multicast packet\n";
+  static struct etimer et;
+  etimer_set(&et, 10*CLOCK_SECOND);
 
   while(1) {
     PROCESS_YIELD();
-    if(ev == tcpip_event) {
-
-      dtls_handle_read(dtls_context);
+    if(etimer_expired(&et)){
+	printf("send_multicast\n");
+	uip_udp_packet_send(mcast_conn, m_buf, strlen(m_buf));
+	etimer_set(&et,CLOCK_SECOND*10);
     }
+
+    if(ev == tcpip_event) {
+	printf("received\n");
+        dtls_handle_read(dtls_context);
+    }
+
   }
 
   PROCESS_END();
