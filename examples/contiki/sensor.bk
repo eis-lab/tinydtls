@@ -26,16 +26,17 @@
  * This file is part of the Contiki operating system.
  *
  */
+
 #define UIP_MCAST6_CONF_ENGINE UIP_MCAST6_ENGINE_ROLL_TM
 #include "net/ipv6/multicast/uip-mcast6.h"
+#if UIP_CONF_IPV6_RPL
+#include "net/rpl/rpl.h"
+#endif
 
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
 
-#if UIP_CONF_IPV6_RPL
-#include "net/rpl/rpl.h"
-#endif
 #include "cfs-coffee.h"
 #include <string.h>
 #include "tinydtls.h"
@@ -296,38 +297,6 @@ cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
   fd = cfs_open(FILENAME,CFS_READ);
 }
 
-/*
-void
-cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
-
-  char msg[payload];
-  char sendbuf[250];
-  int i;
-  fd = cfs_open(FILENAME,CFS_WRITE);
-
-  for(i=0; i < 3; i++){
-    memset(msg,0,payload);
-    sprintf(msg, "data : %d\n",i);
-    strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);
-    cfs_buf[sizeof(cfs_buf)-1] = '\0';
-
-    #ifdef fusion
-    int res = dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
-    printf("dtls_encrypt_data res:%d\n",res);
-    #endif
-
-    if(fd >= 0){
-        int res = cfs_write(fd,sendbuf,sizeof(sendbuf));
-        printf("cfs_write_res: %d, sendbuf_size:%d\n",res,sizeof(sendbuf));
-    } else{
-        printf("\ncfs_file_open error!\n");
-    }
-  }
-  cfs_close(fd);
-  fd = cfs_open(FILENAME,CFS_READ);
-}
-*/
-
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
   if(msg_type == DTLS_EVENT_CONNECTED){
@@ -337,6 +306,10 @@ dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned sh
     if(receiver_num ==1){
     	 //cfs_prepare_data(ctx,session);
 	     connected = 1;
+    }
+
+    if(receiver_num == 2){
+
     }
   }
   return 0;
@@ -386,16 +359,19 @@ PROCESS_THREAD(udp_server_process, ev, data)
   PROCESS_BEGIN();
   PRINTF("sensor started\n");
 
-  /*#if RESOLV_CONF_SUPPORTS_MDNS
-   resolv_set_hostname("sensor");
-  #endif*/
 
-  /*#if UIP_CONF_ROUTER
-   uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
-   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
-   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
-  #endif*/ /* UIP_CONF_ROUTER */
+  /*resolv_set_hostname("contiki-udp-server");
+
+
+  #if UIP_CONF_ROUTER
+    uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
+    uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
+    uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
+  #endif*/
   prepare_mcast();
+  char m_buf[30] = "multicast packet\n";
+  static struct etimer et;
+  etimer_set(&et, 10*CLOCK_SECOND);
 
   dtls_init();
   init_dtls();
@@ -405,34 +381,29 @@ PROCESS_THREAD(udp_server_process, ev, data)
     PROCESS_EXIT();
   }
 
-  //print_local_addresses();
-  char m_buf[30] = "multicast packet\n";
-  static struct etimer et;
-  etimer_set(&et, 10*CLOCK_SECOND);
-
-  
   session_t *vir_sess = (session_t*)malloc(sizeof(session_t));
   if(create_virtual_peer(dtls_context,vir_sess,"Client_identity",15) != 0){
     printf("create virtual peer error\n");
   }
+
   unsigned char id = "Client_identitiy";
-  //create_virtual_peer(ctx,ses,id,sizeof(id));
   calculate_key_block_self(dtls_context,vir_sess);
   cfs_prepare_data(dtls_context,vir_sess);
 
   while(1) {
     PROCESS_YIELD();
     if(etimer_expired(&et)){
-	     printf("send_multicast\n");
-	     uip_udp_packet_send(mcast_conn, m_buf, strlen(m_buf));
+      printf("send_multicast\n");
+      uip_udp_packet_send(mcast_conn,m_buf,strlen(m_buf));
+      etimer_set(&et,CLOCK_SECOND*20);
     }
-
     if(ev == tcpip_event) {
-      etimer_stop(&et);
     	printf("received\n");
       dtls_handle_read(dtls_context);
     }
+
   }
+
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

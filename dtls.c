@@ -282,7 +282,7 @@ dtls_write(struct dtls_context_t *ctx,
     /* dtls_connect() returns a value greater than zero if a new
      * connection attempt is made, 0 for session reuse. */
     res = dtls_connect(ctx, dst);
-    printf("dtls_write_no_peer res :%d\n",res);
+    //printf("dtls_write_no_peer res :%d\n",res);
     return (res >= 0) ? 0 : res;
   } else { /* a session exists, check if it is in state connected */
 
@@ -405,12 +405,11 @@ is_record(uint8 *msg, size_t msglen) {
       && msg[1] == HIGH(DTLS_VERSION)
       && msg[2] == LOW(DTLS_VERSION))
     {
-      rlen = DTLS_RH_LENGTH +
-	dtls_uint16_to_int(DTLS_RECORD_HEADER(msg)->length);
+
+      rlen = DTLS_RH_LENGTH + dtls_uint16_to_int(DTLS_RECORD_HEADER(msg)->length);
 
       /* we do not accept wrong length field in record header */
-      if (rlen > msglen)
-	rlen = 0;
+      if (rlen > msglen) rlen = 0;
   }
 
   return rlen;
@@ -773,6 +772,10 @@ calculate_key_block(dtls_context_t *ctx,
   security->cipher = handshake->cipher;
   security->compression = handshake->compression;
   security->rseq = 0;
+
+  dtls_debug_dump("iv", dtls_kb_local_iv(security, peer->role), 4);
+  dtls_debug_dump("key:", dtls_kb_local_write_key(security, peer->role),
+      dtls_kb_key_size(security, peer->role));
 #if DETAIL_HANDSHAKE_STATS
   powertrace_print("END MASTER SECRET");
 #endif
@@ -1319,7 +1322,7 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
   uint8 *p, *start;
   int res;
   unsigned int i;
-  printf("send buf size : (%d bytes) \n", DTLS_MAX_BUF);
+  //printf("send buf size : (%d bytes) \n", DTLS_MAX_BUF);
   if (*rlen < DTLS_RH_LENGTH) {
     dtls_alert("The sendbuf (%zu bytes) is too small\n", *rlen);
     return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
@@ -1353,7 +1356,7 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
     unsigned char A_DATA[A_DATA_LEN];
 
     if (is_tls_psk_with_aes_128_ccm_8(security->cipher)) {
-      dtls_debug("dtls_prepare_record(): encrypt using TLS_PSK_WITH_AES_128_CCM_8\n");
+      //dtls_debug("dtls_prepare_record(): encrypt using TLS_PSK_WITH_AES_128_CCM_8\n");
     } else if (is_tls_ecdhe_ecdsa_with_aes_128_ccm_8(security->cipher)) {
       dtls_debug("dtls_prepare_record(): encrypt using TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8\n");
     } else {
@@ -1425,7 +1428,6 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
     dtls_debug_dump("nonce:", nonce, DTLS_CCM_BLOCKSIZE);
     dtls_debug_dump("key:", dtls_kb_local_write_key(security, peer->role),
 		    dtls_kb_key_size(security, peer->role));
-
     /* re-use N to create additional data according to RFC 5246, Section 6.2.3.3:
      *
      * additional_data = seq_num + TLSCompressed.type +
@@ -1446,7 +1448,7 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
     powertrace_print("END ENCRYPT");
 #endif
     rtimer_c = rtimer_arch_now() - rtimer_c;
-    printf("encrypt time measurments :%d\n\n",rtimer_c);
+    //printf("encrypt time measurments :%d\n\n",rtimer_c);
     if (res < 0)
       return res;
 
@@ -1562,7 +1564,7 @@ dtls_encrypt_data(dtls_context_t * ctx,dtls_peer_t *dst, uint8 *buf,size_t len,u
 
 	if(!peer){
 		int res;
-		res = dtls_connect(ctx, dst);
+		res = dtls_connect(ctx, peer);
 		printf("no peer! and dtls_connect executed!\n");
 		return (res >= 0) ? 0 : res;
 	} else {
@@ -1662,11 +1664,11 @@ dtls_prepare_record_x(dtls_peer_t *peer, dtls_security_parameters_t *security,
     memcpy(nonce, dtls_kb_local_iv(security, peer->role),
 	   dtls_kb_iv_size(security, peer->role));
     memcpy(nonce + dtls_kb_iv_size(security, peer->role), start, 8); /* epoch + seq_num */
-    //dtls_debug_dump("..iv", dtls_kb_local_iv(security, peer->role), 4);
-    //dtls_debug_dump("..epoch+seq:", start, 8);
-    //dtls_debug_dump("..nonce:", nonce, DTLS_CCM_BLOCKSIZE);
-  //  dtls_debug_dump("key:", dtls_kb_local_write_key(security, peer->role),
-	//	    dtls_kb_key_size(security, peer->role));
+    dtls_debug_dump("..iv", dtls_kb_local_iv(security, peer->role), 4);
+    dtls_debug_dump("..epoch+seq:", start, 8);
+    dtls_debug_dump("..nonce:", nonce, DTLS_CCM_BLOCKSIZE);
+    dtls_debug_dump("key:", dtls_kb_local_write_key(security, peer->role),
+	  dtls_kb_key_size(security, peer->role));
 
     /* re-use N to create additional data according to RFC 5246, Section 6.2.3.3:
      *
@@ -1693,7 +1695,7 @@ dtls_prepare_record_x(dtls_peer_t *peer, dtls_security_parameters_t *security,
       return res;
 
     res += 8;			/* increment res by size of nonce_explicit */
-  //  dtls_debug_dump("message:", start, res);
+    dtls_debug_dump("message:", start, res);
   }
 
   /* fix length of fragment in sendbuf */
@@ -1742,8 +1744,8 @@ dtls_send_multi(dtls_context_t *ctx, dtls_peer_t *peer,
     if (n) {
       dtls_tick_t now;
       dtls_ticks(&now);
-      //n->t = now + 4 * CLOCK_SECOND;
       n->t = now + 20 * CLOCK_SECOND;
+      //n->t = now + 20 * CLOCK_SECOND;
       n->timeout = 20 * CLOCK_SECOND;
       n->retransmit_cnt = 0;
       //n->timeout = 4 * CLOCK_SECOND;
@@ -4173,7 +4175,7 @@ handle_handshake(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
 
     /* This is a ClientHello or Hello Request send when doing TLS renegotiation */
     if ((hs_header->msg_type == DTLS_HT_CLIENT_HELLO ||
-	hs_header->msg_type == DTLS_HT_HELLO_REQUEST) &&
+	     hs_header->msg_type == DTLS_HT_HELLO_REQUEST) &&
             (!peer || peer->state != DTLS_STATE_CONNECTED)) {
       return handle_handshake_msg(ctx, peer, session, role, state, data,
 				  data_length);
@@ -4416,7 +4418,7 @@ dtls_handle_message(dtls_context_t *ctx,
     dtls_debug("dtls_handle_message: PEER NOT FOUND\n");
     dtls_dsrv_log_addr(DTLS_LOG_DEBUG, "peer addr", session);
   } else {
-    dtls_debug("dtls_handle_message: FOUND PEER\n");
+    //dtls_debug("dtls_handle_message: FOUND PEER\n");
   }
 
 #if WITH_HANDSHAKE_STATS
@@ -4433,6 +4435,7 @@ dtls_handle_message(dtls_context_t *ctx,
       powertrace_print("START HANDSHAKE");
   }
 #endif
+dtls_debug_hexdump("hexdump message: ",msg,msglen);
 
   while ((rlen = is_record(msg,msglen))) {
 #if DETAIL_HANDSHAKE_STATS
@@ -4441,7 +4444,7 @@ dtls_handle_message(dtls_context_t *ctx,
     dtls_peer_type role;
     dtls_state_t state;
 
-    dtls_debug("got packet %d (%d bytes)\n", msg[0], rlen);
+    //dtls_debug("got packet %d (%d bytes)\n", msg[0], rlen);
     if (peer) {
       data_length = decrypt_verify(peer, msg, rlen, &data);
       if (data_length < 0) {
@@ -4531,51 +4534,51 @@ dtls_handle_message(dtls_context_t *ctx,
       /* Handshake messages other than Finish must use the current
        * epoch, Finish has epoch + 1. */
       if (peer) {
-	uint16_t expected_epoch = dtls_security_params(peer)->epoch;
-	uint16_t msg_epoch =
-	  dtls_uint16_to_int(DTLS_RECORD_HEADER(msg)->epoch);
+      	uint16_t expected_epoch = dtls_security_params(peer)->epoch;
+      	uint16_t msg_epoch =
+      	  dtls_uint16_to_int(DTLS_RECORD_HEADER(msg)->epoch);
 
-	/* The new security parameters must be used for all messages
-	 * that are sent after the ChangeCipherSpec message. This
-	 * means that the client's Finished message uses epoch + 1
-	 * while the server is still in the old epoch.
-	 */
-	if (role == DTLS_SERVER && state == DTLS_STATE_WAIT_FINISHED) {
-	  expected_epoch++;
-	}
+      	/* The new security parameters must be used for all messages
+      	 * that are sent after the ChangeCipherSpec message. This
+      	 * means that the client's Finished message uses epoch + 1
+      	 * while the server is still in the old epoch.
+      	 */
+      	if (role == DTLS_SERVER && state == DTLS_STATE_WAIT_FINISHED) {
+      	  expected_epoch++;
+      	}
 
-	if (expected_epoch != msg_epoch) {
-	  dtls_warn("Wrong epoch, expected %i, got: %i\n",
-		    expected_epoch, msg_epoch);
-	  // zhitao: EXPERIMENTAL
-	  dtls_warn("removing peer\n");
-	  dtls_stop_retransmission(ctx, peer);
-	  dtls_destroy_peer(ctx, peer, 1);
-	  break;
-	} else {
-		// zhitao: DEBUG PRINT
-	  dtls_info("epoch %i\n", expected_epoch);
-	}
+      	if (expected_epoch != msg_epoch) {
+      	  dtls_warn("Wrong epoch, expected %i, got: %i\n",
+      		    expected_epoch, msg_epoch);
+      	  // zhitao: EXPERIMENTAL
+      	  dtls_warn("removing peer\n");
+      	  dtls_stop_retransmission(ctx, peer);
+      	  dtls_destroy_peer(ctx, peer, 1);
+      	  break;
+      	} else {
+      		// zhitao: DEBUG PRINT
+      	  dtls_info("epoch %i\n", expected_epoch);
+      	}
       }
 
       err = handle_handshake(ctx, peer, session, role, state, data, data_length);
       if (err < 0) {
-	dtls_warn("error while handling handshake packet\n");
-	dtls_alert_send_from_err(ctx, peer, session, err);
-	return err;
+      	dtls_warn("error while handling handshake packet\n");
+      	dtls_alert_send_from_err(ctx, peer, session, err);
+      	return err;
       }
-#if DETAIL_HANDSHAKE_STATS
-      powertrace_print("DONE HANDLE HANDSHAKE");
-#endif
+      #if DETAIL_HANDSHAKE_STATS
+            powertrace_print("DONE HANDLE HANDSHAKE");
+      #endif
       if (peer && peer->state == DTLS_STATE_CONNECTED) {
-#if WITH_HANDSHAKE_STATS
-        total_time = RTIMER_NOW() - total_start_time;
-        dtls_emerg("Total time: %lu\r\n",total_time);
-        dtls_emerg("Retransmit count: %d\n", retransmit_count);
-#endif
-	/* stop retransmissions */
-	dtls_stop_retransmission(ctx, peer);
-	CALL(ctx, event, &peer->session, 0, DTLS_EVENT_CONNECTED);
+          #if WITH_HANDSHAKE_STATS
+                  total_time = RTIMER_NOW() - total_start_time;
+                  dtls_emerg("Total time: %lu\r\n",total_time);
+                  dtls_emerg("Retransmit count: %d\n", retransmit_count);
+          #endif
+          	/* stop retransmissions */
+          	dtls_stop_retransmission(ctx, peer);
+          	CALL(ctx, event, &peer->session, 0, DTLS_EVENT_CONNECTED);
       }
       break;
 
@@ -4588,12 +4591,12 @@ dtls_handle_message(dtls_context_t *ctx,
       }
       dtls_stop_retransmission(ctx, peer);
       CALL(ctx, read, &peer->session, data, data_length);
-#if DETAIL_HANDSHAKE_STATS
-      powertrace_print("DONE HANDLE APPLICATION");
-#endif
-      break;
-    default:
-      dtls_info("dropped unknown message of type %d\n",msg[0]);
+    #if DETAIL_HANDSHAKE_STATS
+          powertrace_print("DONE HANDLE APPLICATION");
+    #endif
+          break;
+        default:
+          dtls_info("dropped unknown message of type %d\n",msg[0]);
     }
 
     /* advance msg by length of ciphertext */
@@ -4669,7 +4672,7 @@ dtls_new_context(void *app_data) {
 void
 dtls_free_context(dtls_context_t *ctx) {
   dtls_peer_t *p;
-  printf("dtls_free_context!\n");
+
   if (!ctx) {
     return;
   }
@@ -4861,6 +4864,150 @@ dtls_check_retransmit(dtls_context_t *context, clock_time_t *next) {
 
   if (next && node)
     *next = node->t;
+}
+
+int
+create_virtual_peer(dtls_context_t *ctx, session_t *sess,unsigned char *psk_id, size_t len){
+	//create peer
+	dtls_peer_t *peer;
+  memset(sess,0,sizeof(session_t));
+  uip_ipaddr_t ipaddr;
+  uip_ipaddr(&ipaddr, 127,0,0,1);
+  sess -> addr = ipaddr;
+	peer = dtls_new_peer(sess);
+
+	if(!peer){
+		dtls_crit("cannot create new peer\n");
+    return -1;
+	}
+
+	peer-> role = DTLS_SERVER;
+	peer-> handshake_params = dtls_handshake_new();
+	peer-> state = DTLS_STATE_CONNECTED;
+
+	dtls_cipher_t newchiper = TLS_PSK_WITH_AES_128_CCM_8;
+	dtls_handshake_parameters_t *handshake = peer->handshake_params;
+	handshake->cipher = newchiper;
+  //handshake->compression = TLS_COMPRESSION_NULL;
+
+	dtls_security_parameters_t *security = dtls_security_params(peer);
+	security->cipher = newchiper;
+	security->epoch = 1;
+	security->rseq = 1;
+	security->compression = TLS_COMPRESSION_NULL;
+
+	handshake -> keyx.psk.id_length = len;
+  memcpy(handshake->keyx.psk.identity, psk_id, len);
+  dtls_add_peer(ctx, peer);
+  //calculate_key_block_self(ctx,sess);
+  //dtls_security_params_switch(peer);
+
+  return 0;
+}
+
+int
+calculate_key_block_self(dtls_context_t *ctx,
+		    session_t *sess){
+
+  dtls_peer_t * peer = dtls_get_peer(ctx,sess);
+  dtls_handshake_parameters_t *handshake = peer->handshake_params;
+  dtls_security_parameters_t *security = dtls_security_params_next(peer);
+
+  unsigned char *pre_master_secret;
+  int pre_master_len = 0;
+  uint8 master_secret[DTLS_MASTER_SECRET_LENGTH];
+
+  if (!security) {
+    return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
+  }
+
+  pre_master_secret = security->key_block;
+
+  if(handshake->cipher == TLS_PSK_WITH_AES_128_CCM_8){
+    unsigned char psk[DTLS_PSK_MAX_KEY_LEN];
+    int len;
+
+    len = CALL(ctx, get_psk_info, sess, DTLS_PSK_KEY,
+	       handshake->keyx.psk.identity,
+	       handshake->keyx.psk.id_length,
+	       psk, DTLS_PSK_MAX_KEY_LEN);
+
+    if (len < 0) {
+      dtls_crit("no psk key for session available\n");
+      return len;
+    }
+  /* Temporarily use the key_block storage space for the pre master secret. */
+    pre_master_len = dtls_psk_pre_master_secret(psk, len,
+						pre_master_secret,
+						MAX_KEYBLOCK_LENGTH);
+
+    dtls_debug_hexdump("psk", psk, len);
+
+    memset(psk, 0, DTLS_PSK_MAX_KEY_LEN);
+    if (pre_master_len < 0) {
+      dtls_crit("the psk was too long, for the pre master secret\n");
+      return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
+    }
+
+  } else {
+    dtls_crit("calculate_key_block: unknown cipher\n");
+    return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
+  }
+
+  dtls_debug_dump("client_random", handshake->tmp.random.client, DTLS_RANDOM_LENGTH);
+  dtls_debug_dump("server_random", handshake->tmp.random.server, DTLS_RANDOM_LENGTH);
+  dtls_debug_dump("pre_master_secret", pre_master_secret, pre_master_len);
+
+  #ifdef CUSTOM_PRF
+    dtls_prf_custom(pre_master_secret, pre_master_len,
+             PRF_LABEL(master), PRF_LABEL_SIZE(master),
+             handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
+             handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
+             master_secret,
+             DTLS_MASTER_SECRET_LENGTH);
+  #else
+    dtls_prf(pre_master_secret, pre_master_len,
+             PRF_LABEL(master), PRF_LABEL_SIZE(master),
+             handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
+             handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
+             master_secret,
+             DTLS_MASTER_SECRET_LENGTH);
+  #endif
+
+  dtls_debug_dump("master_secret", master_secret, DTLS_MASTER_SECRET_LENGTH);
+
+  /* create key_block from master_secret
+   * key_block = PRF(master_secret,
+                    "key expansion" + tmp.random.server + tmp.random.client) */
+  #ifdef CUSTOM_PRF
+    dtls_prf_custom(master_secret,
+            DTLS_MASTER_SECRET_LENGTH,
+            PRF_LABEL(key), PRF_LABEL_SIZE(key),
+            handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
+            handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
+            security->key_block,
+            dtls_kb_size(security, peer->role));
+  #else
+    dtls_prf(master_secret,
+            DTLS_MASTER_SECRET_LENGTH,
+            PRF_LABEL(key), PRF_LABEL_SIZE(key),
+            handshake->tmp.random.server, DTLS_RANDOM_LENGTH,
+            handshake->tmp.random.client, DTLS_RANDOM_LENGTH,
+            security->key_block,
+            dtls_kb_size(security, peer->role));
+  #endif /*CUSTOM_PRF*/
+
+  memcpy(handshake->tmp.master_secret, master_secret, DTLS_MASTER_SECRET_LENGTH);
+  dtls_debug_keyblock(security);
+  security->cipher = handshake->cipher;
+  security->compression = handshake->compression;
+  security->rseq = 1;
+  security->epoch = 1;
+  dtls_security_params_switch(peer);
+  dtls_debug_dump("test iv", dtls_kb_local_iv(security, peer->role), 4);
+  dtls_debug_dump("test key:", dtls_kb_local_write_key(security, peer->role),
+      dtls_kb_key_size(security, peer->role));
+  return 0;
 }
 
 #ifdef WITH_CONTIKI

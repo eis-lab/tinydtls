@@ -4289,7 +4289,7 @@ dtls_handle_message(dtls_context_t *ctx,
             peer->state = DTLS_STATE_CLOSED;
             dtls_stop_retransmission(ctx, peer);
             dtls_destroy_peer(ctx, peer, 1);
-	    printf("removing peer\n");
+	          printf("removing peer\n");
          }
          return err;
       }

@@ -26,87 +26,57 @@
  * This file is part of the Contiki operating system.
  *
  */
-#define UIP_MCAST6_CONF_ENGINE UIP_MCAST6_ENGINE_ROLL_TM
-#include "net/ipv6/multicast/uip-mcast6.h"
 
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
-
-#if UIP_CONF_IPV6_RPL
-#include "net/rpl/rpl.h"
-#endif
-#include "cfs-coffee.h"
-#include <string.h>
-#include "tinydtls.h"
-
-#ifndef DEBUG
-#define DEBUG DEBUG_PRINT
-#endif
-#include "net/ip/uip-debug.h"
-
-#include "debug.h"
-#include "dtls.h"
-
-#ifdef ENABLE_POWERTRACE
-#include "powertrace.h"
-#endif
-
-#include "sys/rtimer.h"
 #define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define UIP_UDP_BUF  ((struct uip_udp_hdr *)&uip_buf[UIP_LLIPH_LEN])
 
-#define MAX_PAYLOAD_LEN 120
-#define fusion fusion_DTLS
+#include <string.h>
+#include "debug.h"
 
-static int connected = 0;
+#define DEBUG DEBUG_PRINT
+#include "net/ip/uip-debug.h"
+
+#define MAX_PAYLOAD_LEN 120
 
 static struct uip_udp_conn *server_conn;
-static struct uip_udp_conn *mcast_conn;
-
 static int rtimer_count = 0;
 static int rtimer_count2 = 0;
-static dtls_context_t *dtls_context;
-//static session_t *vir_sess;
-int fd;
-int receiver_num = 0;
+static int virtual_peer_created = 0;
+static int handshake_connected = 1;
+static int receiver_num = 0;
+
+#include "dtls.h"
+#include "sys/rtimer.h"
 #include "cfs-coffee.h"
-#define FILENAME "test"
-#define payload 30
-char cfs_buf[payload];
 
-static const unsigned char ecdsa_priv_key[] = {
-                        0xD9, 0xE2, 0x70, 0x7A, 0x72, 0xDA, 0x6A, 0x05,
-                        0x04, 0x99, 0x5C, 0x86, 0xED, 0xDB, 0xE3, 0xEF,
-                        0xC7, 0xF1, 0xCD, 0x74, 0x83, 0x8F, 0x75, 0x70,
-                        0xC8, 0x07, 0x2D, 0x0A, 0x76, 0x26, 0x1B, 0xD4};
+#define FDTLS
+#define FILENAME "cfs_file_name"
+#define PAYLOAD 10
+#define DTLS_RH_LENGTH sizeof(dtls_record_header_t)
+#define BUF_SIZE sizeof(dtls_record_header_t)+ 8 + 8 + PAYLOAD
 
-static const unsigned char ecdsa_pub_key_x[] = {
-                        0xD0, 0x55, 0xEE, 0x14, 0x08, 0x4D, 0x6E, 0x06,
-                        0x15, 0x59, 0x9D, 0xB5, 0x83, 0x91, 0x3E, 0x4A,
-                        0x3E, 0x45, 0x26, 0xA2, 0x70, 0x4D, 0x61, 0xF2,
-                        0x7A, 0x4C, 0xCF, 0xBA, 0x97, 0x58, 0xEF, 0x9A};
-
-static const unsigned char ecdsa_pub_key_y[] = {
-                        0xB4, 0x18, 0xB6, 0x4A, 0xFE, 0x80, 0x30, 0xDA,
-                        0x1D, 0xDC, 0xF4, 0xF4, 0x2E, 0x2F, 0x26, 0x31,
-                        0xD0, 0x43, 0xB1, 0xFB, 0x03, 0xE2, 0x2F, 0x4D,
-                        0x17, 0xDE, 0x43, 0xF9, 0xF9, 0xAD, 0xEE, 0x70};
+int fd;
+char cfs_buf[PAYLOAD];
+static int send_count = 0;
+static dtls_context_t *dtls_context;
 
 PROCESS(udp_server_process, "UDP server process");
-AUTOSTART_PROCESSES(&udp_server_process);
+AUTOSTART_PROCESSES(&resolv_process,&udp_server_process);
+
 /*---------------------------------------------------------------------------*/
 static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
-  printf("\nread from peer func!\n");
+
   size_t i;
-  for (i = 0; i < len; i++)
-    PRINTF("%c", data[i]);
+  //for (i = 0; i < len; i++)
+  //  PRINTF("%c", data[i]);
 
-  char sendbuf[250];
-
-  rtimer_count = rtimer_arch_now();
+#ifdef FDTLS
+  char sendbuf[BUF_SIZE];
 
   int r = cfs_read(fd, &sendbuf, sizeof(sendbuf));
   if(r == 0) {
@@ -124,13 +94,21 @@ read_from_peer(struct dtls_context_t *ctx,
   conn->rport = UIP_HTONS(3001);
   uip_udp_packet_send(conn, sendbuf, sizeof(sendbuf));
 
-  /* Restore server connection to allow data from any node */
-  /* FIXME: do we want this at all? */
   memset(&conn->ripaddr, 0, sizeof(conn->ripaddr));
   memset(&conn->rport, 0, sizeof(conn->rport));
 
   rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  printf("dtls_send rtimer_count:%d\n",rtimer_count2);
+  printf("count:%d\n",rtimer_count2);
+  send_count++;
+#else
+  char buf[PAYLOAD] = "data : 0\n";
+  size_t buflen = sizeof(buf);
+  dtls_write(ctx,session,(uint8 *)buf,buflen);
+  rtimer_count2 = rtimer_arch_now() - rtimer_count;
+  count_array[send_count] = rtimer_count2;
+  send_count++;
+  printf("count:%d\n",rtimer_count2);
+#endif //FDTLS
   return 0;
 }
 
@@ -143,9 +121,9 @@ send_to_peer(struct dtls_context_t *ctx,
   uip_ipaddr_copy(&conn->ripaddr, &session->addr);
   conn->rport = session->port;
 
-  PRINTF("send to ");
-  PRINT6ADDR(&conn->ripaddr);
-  PRINTF(":%u\n", uip_ntohs(conn->rport));
+  //PRINTF("send to ");
+  //PRINT6ADDR(&conn->ripaddr);
+  //PRINTF(":%u\n", uip_ntohs(conn->rport));
 
   uip_udp_packet_send(conn, data, len);
 
@@ -202,33 +180,6 @@ get_psk_info(struct dtls_context_t *ctx, const session_t *session,
 }
 #endif /* DTLS_PSK */
 
-#ifdef DTLS_ECC
-static int
-get_ecdsa_key(struct dtls_context_t *ctx,
-              const session_t *session,
-              const dtls_ecdsa_key_t **result) {
-  static const dtls_ecdsa_key_t ecdsa_key = {
-    .curve = DTLS_ECDH_CURVE_SECP256R1,
-    .priv_key = ecdsa_priv_key,
-    .pub_key_x = ecdsa_pub_key_x,
-    .pub_key_y = ecdsa_pub_key_y
-  };
-
-  *result = &ecdsa_key;
-  return 0;
-}
-
-static int
-verify_ecdsa_key(struct dtls_context_t *ctx,
-                 const session_t *session,
-                 const unsigned char *other_pub_x,
-                 const unsigned char *other_pub_y,
-                 size_t key_size) {
-  return 0;
-}
-#endif /* DTLS_ECC */
-
-
 /*---------------------------------------------------------------------------*/
 static void
 print_local_addresses(void)
@@ -259,35 +210,32 @@ dtls_handle_read(dtls_context_t *ctx) {
     session.port = UIP_UDP_BUF->srcport;
     session.size = sizeof(session.addr) + sizeof(session.port);
 
-    PRINTF("sensor: received from ");
-    PRINT6ADDR(&(session.addr));
-    PRINTF(" :%d\n",uip_ntohs(session.port));
-
     dtls_handle_message(ctx, &session, uip_appdata, uip_datalen());
   }
 }
 
 cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
 
-  char msg[payload];
-  char sendbuf[250];
+  char msg[PAYLOAD] = "data : 0\n";
+  char sendbuf[BUF_SIZE];
   int i;
   fd = cfs_open(FILENAME,CFS_WRITE);
 
-  for(i=0; i < 3; i++){
-    memset(msg,0,payload);
-    sprintf(msg, "data : %d\n",i);
-    strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);
-    cfs_buf[sizeof(cfs_buf)-1] = '\0';
+  for(i=0; i < 100; i++){
 
-    #ifdef fusion
+    #ifdef FDTLS
     int res = dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
-    printf("dtls_encrypt_data res:%d\n",res);
     #endif
 
     if(fd >= 0){
         int res = cfs_write(fd,sendbuf,sizeof(sendbuf));
+        //cfs_write_crypt
         printf("cfs_write_res: %d, sendbuf_size:%d\n",res,sizeof(sendbuf));
+
+        if(res < 0){
+          printf("maximum size: BUF_SIZE*i = %d\n",BUF_SIZE*i);
+          break;
+        }
     } else{
         printf("\ncfs_file_open error!\n");
     }
@@ -295,50 +243,22 @@ cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
   cfs_close(fd);
   fd = cfs_open(FILENAME,CFS_READ);
 }
-
-/*
-void
-cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
-
-  char msg[payload];
-  char sendbuf[250];
-  int i;
-  fd = cfs_open(FILENAME,CFS_WRITE);
-
-  for(i=0; i < 3; i++){
-    memset(msg,0,payload);
-    sprintf(msg, "data : %d\n",i);
-    strncpy(cfs_buf,msg,sizeof(cfs_buf)-1);
-    cfs_buf[sizeof(cfs_buf)-1] = '\0';
-
-    #ifdef fusion
-    int res = dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
-    printf("dtls_encrypt_data res:%d\n",res);
-    #endif
-
-    if(fd >= 0){
-        int res = cfs_write(fd,sendbuf,sizeof(sendbuf));
-        printf("cfs_write_res: %d, sendbuf_size:%d\n",res,sizeof(sendbuf));
-    } else{
-        printf("\ncfs_file_open error!\n");
-    }
-  }
-  cfs_close(fd);
-  fd = cfs_open(FILENAME,CFS_READ);
-}
-*/
 
 static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
-  if(msg_type == DTLS_EVENT_CONNECTED){
-    receiver_num++;
-    printf("dtls_connected!\n\n");
 
-    if(receiver_num ==1){
-    	 //cfs_prepare_data(ctx,session);
-	     connected = 1;
-    }
+  if(msg_type == DTLS_EVENT_CONNECTED){
+       virtual_peer_created = 1;
+       if(virtual_peer_created) {
+         handshake_connected = 1;
+         receiver_num++;
+       }
+
+       if(receiver_num == 1){
+
+       }
   }
+
   return 0;
 }
 
@@ -356,83 +276,58 @@ init_dtls() {
     .verify_ecdsa_key = verify_ecdsa_key
 #endif /* DTLS_ECC */
   };
-
+  //dtls_set_log_level(DTLS_LOG_DEBUG);
   server_conn = udp_new(NULL, UIP_HTONS(3001), NULL);
   udp_bind(server_conn, UIP_HTONS(3000));
-
-  dtls_set_log_level(DTLS_LOG_DEBUG);
 
   dtls_context = dtls_new_context(server_conn);
   if (dtls_context)
     dtls_set_handler(dtls_context, &cb);
 }
 
-static void
-prepare_mcast(void)
-{
-  uip_ipaddr_t ipaddr;
-  uip_ip6addr(&ipaddr, 0xFF1E,0,0,0,0,0,0x89,0xABCD);
-  mcast_conn = udp_new(&ipaddr,UIP_HTONS(3001),NULL);
-}
-
-
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_server_process, ev, data)
 {
-  #if UIP_CONF_ROUTER
-   uip_ipaddr_t ipaddr;
-  #endif /* UIP_CONF_ROUTER */
+#if UIP_CONF_ROUTER
+  uip_ipaddr_t ipaddr;
+#endif /* UIP_CONF_ROUTER */
 
   PROCESS_BEGIN();
-  PRINTF("sensor started\n");
 
-  /*#if RESOLV_CONF_SUPPORTS_MDNS
-   resolv_set_hostname("sensor");
-  #endif*/
+#if RESOLV_CONF_SUPPORTS_MDNS
+  resolv_set_hostname("contiki-udp-server");
+#endif
 
-  /*#if UIP_CONF_ROUTER
-   uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
-   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
-   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
-  #endif*/ /* UIP_CONF_ROUTER */
-  prepare_mcast();
+#if UIP_CONF_ROUTER
+  uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
+  uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
+  uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
+#endif /* UIP_CONF_ROUTER */
+
+  print_local_addresses();
 
   dtls_init();
   init_dtls();
 
-  if(!dtls_context){
-    dtls_emerg("cannot create context\n");
-    PROCESS_EXIT();
-  }
-
-  //print_local_addresses();
-  char m_buf[30] = "multicast packet\n";
-  static struct etimer et;
-  etimer_set(&et, 10*CLOCK_SECOND);
-
-  
-  session_t *vir_sess = (session_t*)malloc(sizeof(session_t));
-  if(create_virtual_peer(dtls_context,vir_sess,"Client_identity",15) != 0){
-    printf("create virtual peer error\n");
-  }
-  unsigned char id = "Client_identitiy";
-  //create_virtual_peer(ctx,ses,id,sizeof(id));
-  calculate_key_block_self(dtls_context,vir_sess);
-  cfs_prepare_data(dtls_context,vir_sess);
+   //create virtual peer
+   unsigned char id[] = "Client_identity";
+   session_t *vir_sess = (session_t*)malloc(sizeof(session_t));
+   if(create_virtual_peer(dtls_context,vir_sess,"Client_identity",15) != 0){
+     printf("create virtual peer error\n");
+   }
+   //calculate keyblock using virtual peer and "psk id"
+   calculate_key_block_self(dtls_context,vir_sess);
+   //prepare_data using key block
+   cfs_prepare_data(dtls_context,vir_sess);
 
   while(1) {
     PROCESS_YIELD();
-    if(etimer_expired(&et)){
-	     printf("send_multicast\n");
-	     uip_udp_packet_send(mcast_conn, m_buf, strlen(m_buf));
-    }
-
     if(ev == tcpip_event) {
-      etimer_stop(&et);
-    	printf("received\n");
+      rtimer_count = rtimer_arch_now();
       dtls_handle_read(dtls_context);
     }
   }
+
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

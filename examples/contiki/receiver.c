@@ -33,7 +33,7 @@
 #include "contiki-lib.h"
 #include "contiki-net.h"
 #include "net/ip/resolv.h"
-#include "dev/serial-line.h"
+
 #include "tinydtls.h"
 
 #include <string.h>
@@ -377,9 +377,8 @@ static int
 dtls_complete(struct dtls_context_t *ctx, session_t *session, int a, unsigned short msg_type){
 
   if(msg_type == DTLS_EVENT_CONNECTED){
-	handshake_complete = 1;
-    //char buf[40] = "reciever send a data request!\n";
-    //dtls_write(ctx, session, (uint8 *)buf, sizeof(buf));
+	   handshake_complete = 1;
+
   }
 }
 
@@ -446,10 +445,9 @@ join_mcast_group(void)
   return rv;
 }
 
-void dtls_reqeust(session_t * dst)
-{  
+void dtls_request(session_t * dst)
+{
   if(uip_newdata()){
-    printf("uip_newdata\n");
     uip_ipaddr_copy(&(dst->addr), &UIP_IP_BUF->srcipaddr);
     //dst->addr = UIP_IP_BUF -> srcipaddr;
   }
@@ -459,7 +457,7 @@ void dtls_reqeust(session_t * dst)
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_client_process, ev, data)
 {
-  
+
   static session_t dst;
   uip_ipaddr_t ipaddr;
 
@@ -468,10 +466,9 @@ PROCESS_THREAD(udp_client_process, ev, data)
 
   dtls_init();
   //init_dtls(&dst);
-  serial_line_init();
 
   //dtls_connect(dtls_context, &dst);
-  
+
   if(join_mcast_group() == NULL ){
         PRINTF("Failed to join multicast group\n");
         PROCESS_EXIT();
@@ -489,10 +486,10 @@ PROCESS_THREAD(udp_client_process, ev, data)
     PROCESS_YIELD();
     if(ev == tcpip_event){
       if(connected == 0){
-      	dtls_reqeust(&dst);
-	connected = 1;	
-	init_dtls(&dst);
-	dtls_connect(dtls_context, &dst);	
+      	dtls_request(&dst);
+	      connected = 1;
+	      init_dtls(&dst);
+	      dtls_connect(dtls_context, &dst);
       }
       else if (handshake_complete) dtls_handle_read(dtls_context);
     }
