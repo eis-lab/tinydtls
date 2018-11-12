@@ -4495,7 +4495,7 @@ END GROUP
  .data.udp_client_process
                 0x20000260       0x10 udp-client.co
                 0x20000260                udp_client_process
- .data.cb.9396  0x20000270       0x10 udp-client.co
+ .data.cb.9416  0x20000270       0x10 udp-client.co
  .data.__ctype_ptr__
                 0x20000280        0x4 /usr/bin/../lib/gcc/arm-none-eabi/4.9.3/../../../../arm-none-eabi/lib/armv7-m/libc.a(lib_a-ctype_.o)
                 0x20000280                __ctype_ptr__
@@ -4509,9 +4509,9 @@ END GROUP
                 0x20000288        0x1 obj_openmote-cc2538/rpl-icmp6.o
  .data.psk_key  0x20000289       0x20 udp-client.co
  .data.buf      0x200002a9        0xe udp-client.co
- .data.status.9433
-                0x200002b7        0x1 udp-client.co
- .data.psk_id   0x200002b8       0x20 udp-client.co
+ .data.psk_id   0x200002b7       0x20 udp-client.co
+ .data.status.9453
+                0x200002d7        0x1 udp-client.co
                 0x200002d8                _edata = .
                 0x00214c50                _ldata = LOADADDR (.data)
 
@@ -4698,20 +4698,20 @@ END GROUP
                 0x20002c74        0x4 obj_openmote-cc2538/contikimac.o
  .bss.handshake_complete
                 0x20002c78        0x4 udp-client.co
- .bss.dst.9427  0x20002c7c       0x18 udp-client.co
  .bss.receive_num
-                0x20002c94        0x4 udp-client.co
+                0x20002c7c        0x4 udp-client.co
  .bss.dtls_context
-                0x20002c98        0x4 udp-client.co
- .bss.buflen    0x20002c9c        0x4 udp-client.co
+                0x20002c80        0x4 udp-client.co
+ .bss.buflen    0x20002c84        0x4 udp-client.co
  .bss.client_conn
-                0x20002ca0        0x4 udp-client.co
+                0x20002c88        0x4 udp-client.co
  .bss.total_count
-                0x20002ca4        0x4 udp-client.co
+                0x20002c8c        0x4 udp-client.co
  .bss.rtimer_count2
-                0x20002ca8        0x4 udp-client.co
+                0x20002c90        0x4 udp-client.co
  .bss.rtimer_count
-                0x20002cac        0x4 udp-client.co
+                0x20002c94        0x4 udp-client.co
+ .bss.dst.9447  0x20002c98       0x18 udp-client.co
  .bss.my_tag    0x20002cb0        0x2 obj_openmote-cc2538/sicslowpan.o
  .bss.lastport  0x20002cb2        0x2 obj_openmote-cc2538/uip6.o
  .bss.loc_fipaddr

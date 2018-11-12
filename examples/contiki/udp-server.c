@@ -26,7 +26,10 @@
  * This file is part of the Contiki operating system.
  *
  */
-
+#include "dev/cc2538-sensors.h"
+#include "dev/leds.h"
+#include "lib/aes-128.h"
+#include "cc2538-aes-128.h"
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
@@ -98,7 +101,7 @@ read_from_peer(struct dtls_context_t *ctx,
   memset(&conn->rport, 0, sizeof(conn->rport));
 
   rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  printf("count:%d\n",rtimer_count2);
+  //printf("count:%d\n",rtimer_count2);
   send_count++;
 #else
   char buf[PAYLOAD] = "data : 0\n";
@@ -109,6 +112,9 @@ read_from_peer(struct dtls_context_t *ctx,
   send_count++;
   printf("count:%d\n",rtimer_count2);
 #endif //FDTLS
+  //leds_off(LEDS_ALL);
+  //leds_on(LEDS_ALL);
+  leds_blink();
   return 0;
 }
 
@@ -222,7 +228,9 @@ cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
   fd = cfs_open(FILENAME,CFS_WRITE);
 
   for(i=0; i < 100; i++){
-
+    //leds_off(LEDS_ALL);
+    //leds_on(i&LEDS_ALL);
+    //leds_blink();
     #ifdef FDTLS
     int res = dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
     #endif
@@ -288,6 +296,36 @@ init_dtls() {
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_server_process, ev, data)
 {
+
+ //leds_on(LEDS_GREEN); //첫번째 LED
+ //leds_on(LEDS_YELLOW); //두번째 LED
+ //leds_on(LEDS_ORANGE); //세번째 LED
+ //leds_on(LEDS_RED); //네번째 LED
+
+ //leds_off(LEDS_GREEN); //첫번째 LED
+ //leds_off(LEDS_YELLOW); //두번째 LED
+ //leds_off(LEDS_ORANGE); //세번째 LED
+ //leds_off(LEDS_RED); //네번째 LED
+ leds_init();
+ leds_on(LEDS_ALL);
+ //leds_toggle(LEDS_ALL);
+
+ /* uint8_t key[16] = { 0x00 , 0x01 , 0x02 , 0x03 ,
+                      0x04 , 0x05 , 0x06 , 0x07 ,
+                      0x08 , 0x09 , 0x0A , 0x0B ,
+                      0x0C , 0x0D , 0x0E , 0x0F };
+  uint8_t data2[16] = { 0x00 , 0x11 , 0x22 , 0x33 ,
+                                         0x44 , 0x55 , 0x66 , 0x77 ,
+                                         0x88 , 0x99 , 0xAA , 0xBB ,
+                                         0xCC , 0xDD , 0xEE , 0xFF };
+   AES_128.set_key(key);
+   AES_128.encrypt(data2);*/
+  //char key[10] = "5412412";
+  //char test[100] = "test";
+  //AES_128.set_key((uint8_t*)key);
+  //cc2538_aes_128_driver.set_key((uint8_t*)key);
+  //cc2538_aes_128_driver.encrypt((uint8_t*)test);
+
 #if UIP_CONF_ROUTER
   uip_ipaddr_t ipaddr;
 #endif /* UIP_CONF_ROUTER */
@@ -319,11 +357,15 @@ PROCESS_THREAD(udp_server_process, ev, data)
    calculate_key_block_self(dtls_context,vir_sess);
    //prepare_data using key block
    cfs_prepare_data(dtls_context,vir_sess);
+   
 
   while(1) {
     PROCESS_YIELD();
     if(ev == tcpip_event) {
-      rtimer_count = rtimer_arch_now();
+      leds_blink();
+      //leds_off(LEDS_ALL);
+      //leds_on(LEDS_ALL);
+      //rtimer_count = rtimer_arch_now();
       dtls_handle_read(dtls_context);
     }
   }
