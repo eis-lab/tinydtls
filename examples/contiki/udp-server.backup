@@ -28,7 +28,7 @@
  */
 #include "sys/stimer.h"
 #include "sys/etimer.h"
-//#include "dev/cc2538-sensors.h"
+#include "dev/cc2538-sensors.h"
 #include "dev/leds.h"
 #include "lib/aes-128.h"
 //#include "cc2538-aes-128.h"
@@ -83,7 +83,7 @@ read_from_peer(struct dtls_context_t *ctx,
 
 #ifdef FDTLS
   char sendbuf[BUF_SIZE];
-  
+
   int r = cfs_read(fd, &sendbuf, sizeof(sendbuf));
   if(r == 0) {
     printf("r is 0\n");
@@ -99,7 +99,11 @@ read_from_peer(struct dtls_context_t *ctx,
   uip_ipaddr_copy(&conn->ripaddr, &session->addr);
   conn->rport = UIP_HTONS(3001);
 
-  clock_delay(10000); //10ms delay
+  clock_delay(400);
+  leds_off(LEDS_ALL);
+  clock_delay(400);
+  leds_on(LEDS_ALL);
+  clock_delay(400);
 
   uip_udp_packet_send(conn, sendbuf, sizeof(sendbuf));
 
@@ -108,24 +112,19 @@ read_from_peer(struct dtls_context_t *ctx,
 
   //rtimer_count2 = rtimer_arch_now() - rtimer_count;
   //printf("count:%d\n",rtimer_count2);
-
   send_count++;
 #else
-  //printf("no FDTLS\n");
   char buf[PAYLOAD] = "data : 0\n";
   size_t buflen = sizeof(buf);
-
-  clock_delay(40000);
-
   dtls_write(ctx,session,(uint8 *)buf,buflen);
   rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  //count_array[send_count] = rtimer_count2;
+  count_array[send_count] = rtimer_count2;
   send_count++;
   printf("count:%d\n",rtimer_count2);
 #endif //FDTLS
 
   if(send_count == packet_num){
-    //printf("process over!\n");
+    printf("process over!\n");
   }
 
   return 0;
@@ -144,9 +143,9 @@ send_to_peer(struct dtls_context_t *ctx,
   //PRINT6ADDR(&conn->ripaddr);
   //PRINTF(":%u\n", uip_ntohs(conn->rport));
 
-  //leds_off(LEDS_ALL);
+  leds_off(LEDS_ALL);
   //clock_delay(3000);
-  //leds_on(LEDS_ALL);
+  leds_on(LEDS_ALL);
 
   uip_udp_packet_send(conn, data, len);
 
@@ -233,9 +232,9 @@ dtls_handle_read(dtls_context_t *ctx) {
     session.port = UIP_UDP_BUF->srcport;
     session.size = sizeof(session.addr) + sizeof(session.port);
 
-    //PRINTF("server: received from ");
-    //PRINT6ADDR(&(session.addr));
-    //PRINTF(" :%d\n",uip_ntohs(session.port));
+    PRINTF("server: received from ");
+    PRINT6ADDR(&(session.addr));
+    PRINTF(" :%d\n",uip_ntohs(session.port));
 
     dtls_handle_message(ctx, &session, uip_appdata, uip_datalen());
   }
@@ -394,7 +393,6 @@ PROCESS_THREAD(udp_server_process, ev, data)
     if(ev == tcpip_event) {
       if(handshake_completed){
         //rtimer_count = rtimer_arch_now();
-        clock_delay(10000); //10ms delay
       }
 
       dtls_handle_read(dtls_context);

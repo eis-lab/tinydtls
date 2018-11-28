@@ -88,7 +88,7 @@ try_send(struct dtls_context_t *ctx, session_t *dst) {
 static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
-  printf("read from peer function\n");
+
   receive_num++;
   struct uip_udp_conn *conn = (struct uip_udp_conn *)dtls_get_app_data(ctx);
   uip_ipaddr_copy(&conn->ripaddr, &session->addr);
@@ -257,7 +257,7 @@ init_dtls(session_t *dst) {
   PRINT6ADDR(&dst->addr);
   PRINTF(":%d\n", uip_ntohs(dst->port));
 
-  //dtls_set_log_level(DTLS_LOG_DEBUG);
+  dtls_set_log_level(DTLS_LOG_DEBUG);
 
   dtls_context = dtls_new_context(client_conn);
   if (dtls_context)
@@ -406,7 +406,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
           PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
           dtls_write(dtls_context, &dst, (uint8 *)buf, sizeof(buf));
           printf("send packet\n");
-          break;
+          PROCESS_END();
         }
     }
   }
