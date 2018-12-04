@@ -24,6 +24,9 @@
  * SOFTWARE.
  */
 
+#define CONTIKI_TARGET_CC2538DK
+#define CC2538DK_AES
+
 #ifndef _DTLS_CRYPTO_H_
 #define _DTLS_CRYPTO_H_
 

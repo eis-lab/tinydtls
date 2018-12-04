@@ -589,7 +589,7 @@ known_cipher(dtls_context_t *ctx, dtls_cipher_t code, int is_client) {
 /** Dump out the cipher keys and IVs used for the symetric cipher. */
 static void dtls_debug_keyblock(dtls_security_parameters_t *config)
 {
-  dtls_debug("key_block (%d bytes):\n", dtls_kb_size(config, peer->role));
+  //dtls_debug("key_block (%d bytes):\n", dtls_kb_size(config, peer->role));
   dtls_debug_dump("  client_MAC_secret",
 		  dtls_kb_client_mac_secret(config, peer->role),
 		  dtls_kb_mac_secret_size(config, peer->role));

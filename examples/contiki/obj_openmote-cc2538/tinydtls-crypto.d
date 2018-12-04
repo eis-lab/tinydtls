@@ -96,6 +96,9 @@ obj_openmote-cc2538/tinydtls-crypto.o: \
  ../../../../apps/tinydtls/alert.h ../../../../apps/tinydtls/dtls_time.h \
  ../../../../core/sys/clock.h ../../../../apps/tinydtls/prng.h \
  ../../../../core/lib/random.h ../../../../apps/tinydtls/netq.h \
+ ../../../../cpu/cc2538/dev/crypto.h \
+ ../../../../cpu/cc2538/./dev/sys-ctrl.h ../../../../cpu/cc2538/dev/ccm.h \
+ ../../../../cpu/cc2538/./dev/aes.h ../../../../cpu/cc2538/./dev/crypto.h \
  ../../../../core/lib/memb.h
  ../../../../apps/tinydtls/tinydtls-crypto.c :
  ../../../../apps/tinydtls/tinydtls.h :
@@ -194,4 +197,7 @@ obj_openmote-cc2538/tinydtls-crypto.o: \
  ../../../../apps/tinydtls/alert.h ../../../../apps/tinydtls/dtls_time.h :
  ../../../../core/sys/clock.h ../../../../apps/tinydtls/prng.h :
  ../../../../core/lib/random.h ../../../../apps/tinydtls/netq.h :
+ ../../../../cpu/cc2538/dev/crypto.h :
+ ../../../../cpu/cc2538/./dev/sys-ctrl.h ../../../../cpu/cc2538/dev/ccm.h :
+ ../../../../cpu/cc2538/./dev/aes.h ../../../../cpu/cc2538/./dev/crypto.h :
  ../../../../core/lib/memb.h :

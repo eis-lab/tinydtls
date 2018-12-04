@@ -572,8 +572,8 @@ dtls_encrypt(const unsigned char *src, size_t length,
 	     const unsigned char *aad, size_t la)
 {
 #ifdef CC2538DK_AES
-    dtls_debug("Using hardware cryptoprocessor for AES-CCM\n");
-    printf("\nhardware encryption\n"); //test
+    //dtls_debug("Using hardware cryptoprocessor for AES-CCM\n");
+    //printf("\nhardware encryption\n"); //test
     crypto_enable();
 
     /* Initialize the key variables */
@@ -589,7 +589,7 @@ dtls_encrypt(const unsigned char *src, size_t length,
         aes_status = ccm_auth_encrypt_start(max(2, 15 - DTLS_CCM_NONCE_SIZE), key_area,
                                             nounce, aad, la, src, length, buf, 8, NULL);
         if(aes_status == CRYPTO_SUCCESS) {
-            dtls_debug("Encryption started\n");
+            //dtls_debug("Encryption started\n");
             /* Wait for the operation to finish*/
             while(!ccm_auth_encrypt_check_status()) ;
 
@@ -597,7 +597,7 @@ dtls_encrypt(const unsigned char *src, size_t length,
             uint8_t hmac_len = 8;
             aes_status = ccm_auth_encrypt_get_result(hmac, hmac_len);
             if(aes_status == CRYPTO_SUCCESS) {
-                dtls_debug("Encryption ended without error\n");
+                //dtls_debug("Encryption ended without error\n");
                 memcpy(buf+length, hmac, hmac_len);
                 crypto_disable();
                 return (length + hmac_len);
@@ -608,6 +608,7 @@ dtls_encrypt(const unsigned char *src, size_t length,
             dtls_debug("ERROR: Could not start encryption, AES STATUS %u\n", aes_status);
         }
     } else {
+        dtls_debug("ERROR: dtls_encrypt\n");
         dtls_debug("ERROR: Could not load key for AES-CCM, AES STATUS %u\n", aes_status);
     }
     crypto_disable();
@@ -641,7 +642,7 @@ dtls_decrypt(const unsigned char *src, size_t length,
 	     const unsigned char *aad, size_t la)
 {
 #ifdef CC2538DK_AES
-    dtls_debug("Using hardware cryptoprocessor for AES-CCM\n");
+    //dtls_debug("Using hardware cryptoprocessor for AES-CCM\n");
     crypto_enable();
 
     /* Initialize the key variables */
@@ -657,7 +658,7 @@ dtls_decrypt(const unsigned char *src, size_t length,
         aes_status = ccm_auth_decrypt_start(max(2, 15 - DTLS_CCM_NONCE_SIZE), key_area,
                                             nounce, aad, la, src, length, buf, 8, NULL);
         if(aes_status == CRYPTO_SUCCESS) {
-            dtls_debug("Decryption started\n");
+            //dtls_debug("Decryption started\n");
             /* Wait for the operation to finish*/
             while(!ccm_auth_decrypt_check_status()) ;
 
@@ -665,7 +666,7 @@ dtls_decrypt(const unsigned char *src, size_t length,
             uint8_t hmac_len = 8;
             aes_status = ccm_auth_decrypt_get_result(buf, length, hmac, hmac_len);
             if(aes_status == CRYPTO_SUCCESS) {
-                dtls_debug("Decryption ended without error\n");
+                //dtls_debug("Decryption ended without error\n");
                 crypto_disable();
                 return length - hmac_len;
             } else {
@@ -675,6 +676,7 @@ dtls_decrypt(const unsigned char *src, size_t length,
             dtls_debug("ERROR: Could not start encryption, AES STATUS %u\n", aes_status);
         }
     } else {
+        dtls_debug("ERROR: dtls_decrypt\n");
         dtls_debug("ERROR: Could not load key for AES-CCM, AES STATUS %u\n", aes_status);
     }
     crypto_disable();
