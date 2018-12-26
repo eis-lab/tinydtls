@@ -53,26 +53,31 @@ static rtimer_clock_t rtimer_count, rtimer_count2;
 static int virtual_peer_created = 0;
 static int handshake_completed = 0;
 static int receiver_num = 0;
-static int packet_num = 1;
+static int packet_num = 50;
 static int send_count = 0;
 
 #include "dtls.h"
+#include "tiny-AES-c/aes.h"
 #include "sys/etimer.h"
 #include "cfs-coffee.h"
 
-#define FDTLS
+#define CTR 1
+//#define FDTLS
+//#define HW_AES
 //#define ENERGY_TEST
 #define FILENAME "cfs_file_name"
-#define PAYLOAD 10
-#define DTLS_RH_LENGTH sizeof(dtls_record_header_t)
+#define PAYLOAD 32
 #define BUF_SIZE sizeof(dtls_record_header_t)+ 8 + 8 + PAYLOAD //
-
+#define INTERVAL 30
+/// payload 60- interval 47
 int fd;
 char cfs_buf[PAYLOAD];
 static dtls_context_t *dtls_context;
+session_t *vir_sess;
 
 
 #ifndef FDTLS
+
 #define NONCE_MAX_LEN   0
 #define ICTR_MAX_LEN    16
 #define MDATA_MAX_LEN   64
@@ -115,7 +120,7 @@ static const struct {
       0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef,
       0xf6, 0x9f, 0x24, 0x45, 0xdf, 0x4f, 0x9b, 0x17,
       0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10 },
-    PAYLOAD,
+    64,
     { 0x87, 0x4d, 0x61, 0x91, 0xb6, 0x20, 0xe3, 0x26,
       0x1b, 0xef, 0x68, 0x64, 0x99, 0x0d, 0xb6, 0xce,
       0x98, 0x06, 0xf6, 0x6b, 0x79, 0x70, 0xfd, 0xff,
@@ -126,9 +131,6 @@ static const struct {
       0x79, 0x21, 0x70, 0xa0, 0xf3, 0x00, 0x9c, 0xee }
   };
 
-//static uint8_t mdata[PAYLOAD];
-static uint8_t key_size_index = -1, ret;
-static int8_t res;
 static rtimer_clock_t time1, time2, total_time;
 #endif
 
@@ -141,32 +143,42 @@ static int
 read_from_peer(struct dtls_context_t *ctx,
                session_t *session, uint8 *data, size_t len) {
 
-  size_t i;
-  //for (i = 0; i < len; i++)
-  //  PRINTF("%c", data[i]);
-fd = cfs_open(FILENAME,CFS_READ);
+  int epoch = 0;		        /**< counter for cipher state changes */
+  int seq = 0;
+  rtimer_clock_t tt2;
+  rtimer_clock_t tt3,tt4,tt5 =0;
+  rtimer_count = rtimer_arch_now();
+  cfs_prepare_data(dtls_context,vir_sess);
+  tt2 = rtimer_arch_now() - rtimer_count;
+
+  fd = cfs_open(FILENAME,CFS_READ);
 
 #ifdef FDTLS
-  char sendbuf[BUF_SIZE];
+  char* sendbuf = (char*)malloc(sizeof(uint8_t)*BUF_SIZE);
   int k;
   struct uip_udp_conn *conn;
-  rtimer_count = rtimer_arch_now();
 
 #ifdef ENERGY_TEST
-  for(k=0; k<3000; k++){
+  for(k=0; k<INTERVAL; k++){
 #endif //ENERGY_TEST
-    int r = cfs_read(fd, &sendbuf, sizeof(sendbuf));
+    tt3 = rtimer_arch_now();
+    int r = cfs_read(fd, sendbuf+21, BUF_SIZE-21);
+    tt4 = rtimer_arch_now() - tt3;
+    tt5 += tt4;
     if(r == 0) {
       printf("r is 0\n");
       cfs_close(fd);
       return 0;
-    } else if(r < sizeof(sendbuf)) {
+    } else if(r < BUF_SIZE-21) {
       printf("close cfs\n");
       cfs_close(fd);
       return 0;
     }
+
+    fdtls_set_record_header(sendbuf,PAYLOAD,epoch,seq);
+
 #ifdef ENERGY_TEST
-    if(k%100 == 0 ){
+    if(k%packet_num == 0 ){
       cfs_seek(fd, 0, CFS_SEEK_SET);
     }
 #endif //ENERGY_TEST
@@ -174,30 +186,41 @@ fd = cfs_open(FILENAME,CFS_READ);
     conn = (struct uip_udp_conn *)dtls_get_app_data(ctx);
     uip_ipaddr_copy(&conn->ripaddr, &session->addr);
     conn->rport = UIP_HTONS(3001);
+
 #ifdef ENERGY_TEST
   }
 #endif //ENERGY_TEST
 
-  //clock_delay(10000); //10ms delay
+#ifdef ENERGY_TEST
+  rtimer_count2 = rtimer_arch_now() - rtimer_count;
+  printf("FDTLS encrypt + cfs_write(PAYLOAD: %d, write:%d, INTERVAL:%d):%d\n",PAYLOAD,BUF_SIZE-21,INTERVAL,tt2);
+  printf("FDTLS total (PAYLOAD:%d, INTERVAL:%d): %d\n",PAYLOAD,INTERVAL,rtimer_count2);
+  printf("fdtls_set_header:%d\n",tt5);
+  //printf("FDTLS prepare data:%d\n",tt2);
+#endif //ENERGY TEST
 
-  uip_udp_packet_send(conn, sendbuf, sizeof(sendbuf));
+  //uip_udp_packet_send(conn, sendbuf, sizeof(sendbuf));
 
   memset(&conn->ripaddr, 0, sizeof(conn->ripaddr));
   memset(&conn->rport, 0, sizeof(conn->rport));
 
+#ifndef ENERGY_TEST
   rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  printf("FDTLS count: %d\n",rtimer_count2);
-  send_count++;
+  printf("FDTLS total (PAYLOAD:%d): %d\n",PAYLOAD,rtimer_count2);
+  printf("FDTLS prepare data:%d\n",tt2);
+  //send_count++;
+#endif //SPEED TEST
 
-#else //no FDTLS
+#else //DTLS!!
 
   char buf[PAYLOAD];
   char mdata[PAYLOAD];
-  int k=0;
-  rtimer_count = rtimer_arch_now();
+  uint8_t ret;
+  int8_t res;
+  int k;
 
 #ifdef ENERGY_TEST
-  for(k=0; k<3000; k++){
+  for(k=0; k<INTERVAL; k++){
 #endif
     int r = cfs_read(fd,&buf,PAYLOAD);
     if(r == 0 ){
@@ -211,46 +234,50 @@ fd = cfs_open(FILENAME,CFS_READ);
     }
 
 #ifdef ENERGY_TEST
-    if(k%100 == 0 ){
+    /*if(k%packet_num == 0 ){
       cfs_seek(fd, 0, CFS_SEEK_SET);
+    }*/
+#endif
+  //  #ifdef HW_AES
+        /*crypto_enable();
+
+        ret = aes_load_keys(keys.keys,keys.key_size, keys.count, 0);
+        if(ret != 0){
+          dtls_debug("aes_load_keys error iteration");
+          return 0;
+        }
+
+        rom_util_memcpy(mdata, buf, PAYLOAD);
+        ret = ctr_crypt_start(true, ctr_vectors.key_area,
+                                ctr_vectors.nonce, ctr_vectors.ictr, ctr_vectors.ctr_len,
+                                mdata, mdata, PAYLOAD,
+                                &udp_server_process);
+        if(ret !=0 ){
+          dtls_debug("aes_load_keys error iteration");
+          return 0;
+        }
+
+        while((res = ctr_crypt_check_status()) == CRYPTO_PENDING);
+
+       crypto_disable();
+
+       dtls_write(ctx,session,(uint8 *)mdata,PAYLOAD);*/
+  // #else  //SW_AES
+       struct AES_ctx aes_ctx;
+       AES_init_ctx_iv(&aes_ctx, keys.keys,ctr_vectors.ictr);
+       AES_CTR_xcrypt_buffer(&aes_ctx, buf, PAYLOAD);
+       printf("buf:%s\n",buf);
+
+  // #endif //HW_AES
+
+#ifdef ENERGY_TEST
     }
 #endif
 
-    //ret = aes_load_keys(keys.keys,keys.key_size, keys.count, 0);
-    rom_util_memcpy(mdata, buf, PAYLOAD);
-
-    time1 = RTIMER_NOW();
-    ret = ctr_crypt_start(true, ctr_vectors.key_area,
-                            ctr_vectors.nonce, ctr_vectors.ictr, ctr_vectors.ctr_len,
-                            mdata, mdata, PAYLOAD,
-                            &udp_server_process);
-    time2 = RTIMER_NOW();
-    time1 = time2 - time1;
-    total_time = time1;
-
-    /*if(rom_util_memcmp(mdata, ctr_vectors.mdata, ctr_vectors.mdata_len)) {
-      puts("Output message does not match expected one");
-    } else {
-      puts("Output message OK");
-    }*/
-
-  //char buf[PAYLOAD] = "data : 0\n";
-  //size_t buflen = sizeof(buf);
-  //clock_delay(40000);
-#ifdef ENERGY_TEST
-  }
-#endif
-
-  dtls_write(ctx,session,(uint8 *)mdata,PAYLOAD);
   rtimer_count2 = rtimer_arch_now() - rtimer_count;
-  //count_array[send_count] = rtimer_count2;
-  //send_count++;
-  printf("DTLS count: %d\n",rtimer_count2);
+  printf("DTLS encrypt + cfs_write(PAYLOAD: %d, INTERVAL:%d):%d\n",PAYLOAD,INTERVAL,tt2);
+  printf("DTLS total (PAYLOAD:%d, INTERVAL:%d): %d\n",PAYLOAD,INTERVAL,rtimer_count2);
 #endif //FDTLS
-
-  if(send_count == packet_num){
-    //printf("process over!\n");
-  }
 
   return 0;
 }
@@ -272,8 +299,10 @@ send_to_peer(struct dtls_context_t *ctx,
     printf("DTLS basic count: %d\n", rtimer_count2);
     //printf("DTLS basic: %d ms\n",(uint32_t)((uint64_t)rtimer_count2 *1000/ RTIMER_SECOND));
   }*/
-  uip_udp_packet_send(conn, data, len);
 
+  if(handshake_completed == 0){
+    uip_udp_packet_send(conn, data, len);
+  }
   /*if(handshake_completed == 1 ){
     rtimer_count2 = rtimer_arch_now() - rtimer_count;
     printf("DTLS basic count: %d\n", rtimer_count2);
@@ -372,65 +401,67 @@ dtls_handle_read(dtls_context_t *ctx) {
 
 cfs_prepare_data(struct dtls_context_t *ctx, session_t *session){
 
-  char msg[PAYLOAD] = "data : 0\n";
+  char msg[PAYLOAD] = "data";
   char sendbuf[BUF_SIZE];
   char mdata[PAYLOAD];
   int i;
+
+  cfs_coffee_reserve(FILENAME,4096);
   fd = cfs_open(FILENAME,CFS_WRITE);
 
+
 #ifndef FDTLS
-  //ret = aes_load_keys(keys.keys,keys.key_size, keys.count, 0);
+   uint8_t ret;
+   int8_t res;
+   crypto_init();
 #endif
 
-  for(i=0; i < packet_num; i++){
+  for(i=0; i < INTERVAL; i++){
 #ifdef FDTLS
-      int res = dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
+      dtls_encrypt_data(ctx,session,msg,sizeof(msg),sendbuf,sizeof(sendbuf));
 #else
-      ret = aes_load_keys(keys.keys,keys.key_size, keys.count, 0);
-      rom_util_memcpy(mdata, ctr_vectors.mdata, ctr_vectors.mdata_len);
+    /*  #ifdef HW_AES
+        crypto_enable();
+        ret = aes_load_keys(keys.keys,keys.key_size, keys.count, 0);
+        if(ret != 0){
+          printf("aes_load_keys error iteration\n");
+        }
+        rom_util_memcpy(mdata, ctr_vectors.mdata, PAYLOAD);
 
-      time1 = RTIMER_NOW();
-      ret = ctr_crypt_start(ctr_vectors.encrypt, ctr_vectors.key_area,
-                              ctr_vectors.nonce, ctr_vectors.ictr, ctr_vectors.ctr_len,
-                              mdata, mdata, ctr_vectors.mdata_len,
-                              &udp_server_process);
-      time2 = RTIMER_NOW();
-      time1 = time2 - time1;
-      total_time = time1;
-      //PROCESS_PAUSE();
 
-      if(rom_util_memcmp(mdata, ctr_vectors.expected, ctr_vectors.mdata_len)) {
-        puts("Output message does not match expected one");
-      } else {
-        puts("Output message OK");
-      }
+        ret = ctr_crypt_start(false, ctr_vectors.key_area,
+                                ctr_vectors.nonce, ctr_vectors.ictr, ctr_vectors.ctr_len,
+                                mdata, mdata, PAYLOAD,
+                                &udp_server_process);
+
+        while((res = ctr_crypt_check_status()) == CRYPTO_PENDING);
+
+        crypto_disable();
+      #else*/
+        //Use Tiny-AES library
+        char aes_buf[PAYLOAD] = "data";
+        struct AES_ctx aes_ctx;
+        AES_init_ctx_iv(&aes_ctx, keys.keys,ctr_vectors.ictr);
+        AES_CTR_xcrypt_buffer(&aes_ctx, aes_buf, PAYLOAD);
+
+      //#endif
 
 #endif
-
     if(fd >= 0){
         #ifdef FDTLS
-          int res = cfs_write(fd,sendbuf,sizeof(sendbuf));
-          //printf("cfs_write_res: %d, sendbuf_size:%d\n",res,sizeof(sendbuf));
+          int res = cfs_write(fd,sendbuf+21,BUF_SIZE-21);
         #else
           int res = cfs_write(fd,mdata,PAYLOAD);
-          //printf("cfs_write_res: %d, mdata_size:%d\n",res,sizeof(mdata));
         #endif
 
         if(res < 0){
           printf("maximum size: BUF_SIZE*i = %d\n",BUF_SIZE*i);
-          break;
+          printf("iteration: %d\n", i);
+          return -1;
         }
-    } else{
-        printf("\ncfs_file_open error!\n");
     }
   }
-#ifndef FDTLS
-  crypto_disable();
-  crypto_init();
-#endif
-
   cfs_close(fd);
-  //fd = cfs_open(FILENAME,CFS_READ);
 }
 
 static int
@@ -513,20 +544,21 @@ PROCESS_BEGIN();
   init_dtls();
 
    //create virtual peer
-   rtimer_count = rtimer_arch_now();
+   //rtimer_count = rtimer_arch_now();
    unsigned char id[] = "Client_identity";
-   session_t *vir_sess = (session_t*)malloc(sizeof(session_t));
+   vir_sess = (session_t*)malloc(sizeof(session_t));
    if(create_virtual_peer(dtls_context,vir_sess,"Client_identity",15) != 0){
      printf("create virtual peer error\n");
    }
    //calculate keyblock using virtual peer and "psk id"
    calculate_key_block_self(dtls_context,vir_sess);
-   rtimer_count2 = rtimer_arch_now() - rtimer_count;
+   //rtimer_count2 = rtimer_arch_now() - rtimer_count;
 
-   printf("virtual_peer count: %d\n", rtimer_count2);
+   //printf("virtual_peer count: %d\n", rtimer_count2);
    //printf("virtual_peer: %d ms\n",(uint32_t)((uint64_t)rtimer_count2 *1000/ RTIMER_SECOND));
-   //prepare_data using key block
-   cfs_prepare_data(dtls_context,vir_sess);
+   //prepare data using key block
+
+   //cfs_prepare_data(dtls_context,vir_sess);
 
   static struct stimer et;
   while(1) {
@@ -534,7 +566,7 @@ PROCESS_BEGIN();
     if(ev == tcpip_event) {
       if(handshake_completed){
         //clock_delay(10000); //10ms delay
-        //rtimer_count = rtimer_arch_now();
+        rtimer_count = rtimer_arch_now();
       }
 
       dtls_handle_read(dtls_context);

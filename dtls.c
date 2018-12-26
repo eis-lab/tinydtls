@@ -195,6 +195,9 @@ free_context(dtls_context_t *context) {
   free(context);
 }
 #endif
+/////////////TEST_TIMER/////////
+//rtimer_clock_t test_time,test_time2;
+////////////////////////////////
 
 void
 dtls_init() {
@@ -273,6 +276,7 @@ int
 dtls_write(struct dtls_context_t *ctx,
 	   session_t *dst, uint8 *buf, size_t len) {
 
+  //test_time = rtimer_arch_now();
   dtls_peer_t *peer = dtls_get_peer(ctx, dst);
 
   /* Check if peer connection already exists */
@@ -450,6 +454,23 @@ dtls_set_record_header(uint8 type, dtls_security_parameters_t *security,
   return buf + sizeof(uint16);
 }
 
+void fdtls_set_record_header(uint8 *buf,int payload_len,uint16 epoch, uint48 seq){
+
+  dtls_int_to_uint8(buf, DTLS_CT_APPLICATION_DATA);
+
+  dtls_int_to_uint16(buf+1, DTLS_VERSION);
+
+  //memcpy(buf+3,buf+13,8);
+  dtls_int_to_uint16(buf+3, epoch);
+
+  dtls_int_to_uint48(buf+5, seq);
+
+  dtls_int_to_uint16(buf+11,payload_len+16);
+
+  dtls_int_to_uint16(buf+13, epoch);
+
+  dtls_int_to_uint48(buf+15, seq);
+}
 /**
  * Initializes \p buf as handshake header. The caller must ensure that \p
  * buf is capable of holding at least \c sizeof(dtls_handshake_header_t)
@@ -1338,7 +1359,8 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
     for (i = 0; i < data_array_len; i++) {
       /* check the minimum that we need for packets that are not encrypted */
       if (*rlen < res + DTLS_RH_LENGTH + data_len_array[i]) {
-        dtls_debug("dtls_prepare_record: send buffer too small\n");
+        dtls_debug("dtls_prepare_record: send buffer too small2\n");
+        dtls_debug("rlen:%d DTLS_RH_LENGTH:%d\n,data_len_array[i]:%d,res:%d\n,",(int)*rlen,(int)DTLS_RH_LENGTH,(int)data_len_array[i],res);
         return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
       }
 
@@ -1411,6 +1433,7 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
       /* check the minimum that we need for packets that are not encrypted */
       if (*rlen < res + DTLS_RH_LENGTH + data_len_array[i]) {
         dtls_debug("dtls_prepare_record: send buffer too small\n");
+        //dtls_debug("rlen:%d DTLS_RH_LENGTH:%d\n,data_len_array[i]:%d,res:%d\n,",(int)*rlen,(int)DTLS_RH_LENGTH,(int)data_len_array[i],res);
         return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
       }
 
@@ -1436,7 +1459,7 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
     memcpy(A_DATA, &DTLS_RECORD_HEADER(sendbuf)->epoch, 8); /* epoch and seq_num */
     memcpy(A_DATA + 8,  &DTLS_RECORD_HEADER(sendbuf)->content_type, 3); /* type and version */
     dtls_int_to_uint16(A_DATA + 11, res - 8); /* length */
-      int rtimer_c = rtimer_arch_now();
+    //int rtimer_c = rtimer_arch_now();
 #if AES_CRYPTO_STATS
     powertrace_print("START ENCRYPT");
 #endif
@@ -1447,7 +1470,7 @@ dtls_prepare_record(dtls_peer_t *peer, dtls_security_parameters_t *security,
 #if AES_CRYPTO_STATS
     powertrace_print("END ENCRYPT");
 #endif
-    rtimer_c = rtimer_arch_now() - rtimer_c;
+    //rtimer_c = rtimer_arch_now() - rtimer_c;
     //printf("encrypt time measurments :%d\n\n",rtimer_c);
     if (res < 0)
       return res;
@@ -1578,7 +1601,8 @@ dtls_encrypt_data(dtls_context_t * ctx,dtls_peer_t *dst, uint8 *buf,size_t len,u
 }
 
 static int
-dtls_encrypt_x(dtls_context_t * ctx, dtls_peer_t *peer, dtls_security_parameters_t *security , session_t *session, unsigned char type, uint8 * buf_array[], size_t buf_len_array[], size_t buf_array_len, uint8 * sendbuf, size_t s_len) {
+dtls_encrypt_x(dtls_context_t * ctx, dtls_peer_t *peer, dtls_security_parameters_t *security , session_t *session,
+ unsigned char type, uint8 * buf_array[], size_t buf_len_array[], size_t buf_array_len, uint8 * sendbuf, size_t s_len) {
 	//unsigned char sendbuf[DTLS_MAX_BUF];
 	size_t len = s_len;
   //printf("sizeof:%d\n",len);
@@ -1697,9 +1721,9 @@ dtls_prepare_record_x(dtls_peer_t *peer, dtls_security_parameters_t *security,
     res += 8;			/* increment res by size of nonce_explicit */
     dtls_debug_dump("message:", start, res);
   }
-
   /* fix length of fragment in sendbuf */
   dtls_int_to_uint16(sendbuf + 11, res);
+  dtls_debug_hexdump("prepare packet",sendbuf,13+8);
 
   *rlen = DTLS_RH_LENGTH + res;
   return 0;
@@ -1718,6 +1742,8 @@ dtls_send_multi(dtls_context_t *ctx, dtls_peer_t *peer,
    * that we might not be able to handle multiple records stuffed in
    * one UDP datagram */
   unsigned char sendbuf[DTLS_MAX_BUF];
+  //printf("SENDBUF - DTLS_MAX_BUF:%d\n",DTLS_MAX_BUF);
+  //printf("DTLS_RH_LENGTH:%d\n",DTLS_RH_LENGTH);
   size_t len = sizeof(sendbuf);
   int res;
   unsigned int i;
@@ -1777,9 +1803,13 @@ dtls_send_multi(dtls_context_t *ctx, dtls_peer_t *peer,
 
   /* FIXME: copy to peer's sendqueue (after fragmentation if
    * necessary) and initialize retransmit timer */
+  //test_time2 = rtimer_arch_now() - test_time;
+
   res = CALL(ctx, write, session, sendbuf, len);
 
+  //dtls_debug("other_process+ encrypt cound:%d\n",test_time2);
   //clock_wait(0.1*CLOCK_SECOND);
+
   /* Guess number of bytes application data actually sent:
    * dtls_prepare_record() tells us in len the number of bytes to
    * send, res will contain the bytes actually sent. */
