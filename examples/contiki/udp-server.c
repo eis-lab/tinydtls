@@ -56,13 +56,14 @@ static int receiver_num = 0;
 static int packet_num = 50;
 static int send_count = 0;
 
+#define CTR 1
 #include "dtls.h"
 #include "tiny-AES-c/aes.h"
+//#include "aes.h"
 #include "sys/etimer.h"
 #include "cfs-coffee.h"
 
-#define CTR 1
-//#define FDTLS
+#define FDTLS
 //#define HW_AES
 //#define ENERGY_TEST
 #define FILENAME "cfs_file_name"
