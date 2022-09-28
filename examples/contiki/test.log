@@ -1,6 +1,0 @@
-  CC        ../../../../cpu/cc2538/./ieee-addr.c
-  CC        ../../../../cpu/cc2538/cc2538.lds
-  CC        udp-server.c
-  CC        ../../../../cpu/cc2538/./ieee-addr.c
-  CC        ../../../../cpu/cc2538/cc2538.lds
-  CC        udp-server.c
