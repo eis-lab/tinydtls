@@ -1,0 +1,96 @@
+  CC        ../../../../cpu/cc2538/./ieee-addr.c
+  CC        ../../../../cpu/cc2538/cc2538.lds
+  CC        udp-server.c
+  LD        udp-server.elf
+arm-none-eabi-objcopy -O binary --gap-fill 0xff udp-server.elf udp-server.bin
+python3 ../../../../tools/cc2538-bsl/cc2538-bsl.py -e --bootloader-invert-lines -w -v -b 450000 -p /dev/ttyUSB1 -a 0x00202000 udp-server.bin
+../../../../tools/sky/serialdump-linux -b115200 /dev/ttyUSB1
+Contiki-3.x-3343-gbc2e445
+OpenMote-CC2538
+CC2538: ID: 0xb964, rev.: PG2.0, Flash: 512 KiB, SRAM: 32 KiB, AES/SHA: 1, ECC/RSA: 1
+System clock: 16000000 Hz
+I/O clock: 16000000 Hz
+Reset cause: CLD or software reset
+Rime configured with address 00:12:4b:00:14:b5:b6:1b
+Net: sicslowpan
+MAC: CSMA
+RDC: ContikiMAC
+Server IPv6 addresses: fd00::212:4b00:14b5:b61b
+fe80::212:4b00:14b5:b61b
+Started DTLS retransmit process
+DTLSv12: initialize HASH_SHA256
+virtual_peer count: 573
+dtls_handle_message: PEER NOT FOUND
+Handshake start
+received handshake packet of type: client_hello (1)
+handle handshake packet of type: client_hello (1)
+cookie len is 0!
+send handshake packet of type: hello_verify_request (3)
+server hello verify was sent
+dtls_handle_message: PEER NOT FOUND
+received handshake packet of type: client_hello (1)
+handle handshake packet of type: client_hello (1)
+found matching cookie
+DTLSv12: initialize HASH_SHA256
+clear MAC
+send handshake packet of type: server_hello (2)
+send handshake packet of type: server_hello_done (14)
+** retransmit handshake packet of type: server_hello (2)
+** retransmit handshake packet of type: server_hello_done (14)
+received handshake packet of type: client_hello (1)
+The message sequence number is too small, expected 2, got: 1
+received handshake packet of type: client_key_exchange (16)
+handle handshake packet of type: client_key_exchange (16)
+received handshake packet of type: finished (20)
+handle handshake packet of type: finished (20)
+send handshake packet of type: finished (20)
+Handshake complete
+Total time: 746752
+Retransmit count: 1
+remove peer!
+  CC        ../../../../cpu/cc2538/./ieee-addr.c
+  CC        ../../../../cpu/cc2538/cc2538.lds
+  CC        udp-server.c
+  LD        udp-server.elf
+arm-none-eabi-objcopy -O binary --gap-fill 0xff udp-server.elf udp-server.bin
+python3 ../../../../tools/cc2538-bsl/cc2538-bsl.py -e --bootloader-invert-lines -w -v -b 450000 -p /dev/ttyUSB1 -a 0x00202000 udp-server.bin
+../../../../tools/sky/serialdump-linux -b115200 /dev/ttyUSB1
+Contiki-3.x-3343-gbc2e445
+OpenMote-CC2538
+CC2538: ID: 0xb964, rev.: PG2.0, Flash: 512 KiB, SRAM: 32 KiB, AES/SHA: 1, ECC/RSA: 1
+System clock: 16000000 Hz
+I/O clock: 16000000 Hz
+Reset cause: CLD or software reset
+Rime configured with address 00:12:4b:00:14:b5:b6:1b
+Net: sicslowpan
+MAC: CSMA
+RDC: ContikiMAC
+Server IPv6 addresses: fd00::212:4b00:14b5:b61b
+fe80::212:4b00:14b5:b61b
+Started DTLS retransmit process
+DTLSv12: initialize HASH_SHA256
+virtual_peer count: 573
+dtls_handle_message: PEER NOT FOUND
+Handshake start
+received handshake packet of type: client_hello (1)
+handle handshake packet of type: client_hello (1)
+cookie len is 0!
+send handshake packet of type: hello_verify_request (3)
+server hello verify was sent
+dtls_handle_message: PEER NOT FOUND
+received handshake packet of type: client_hello (1)
+handle handshake packet of type: client_hello (1)
+found matching cookie
+DTLSv12: initialize HASH_SHA256
+clear MAC
+send handshake packet of type: server_hello (2)
+send handshake packet of type: server_hello_done (14)
+received handshake packet of type: client_key_exchange (16)
+handle handshake packet of type: client_key_exchange (16)
+received handshake packet of type: finished (20)
+handle handshake packet of type: finished (20)
+send handshake packet of type: finished (20)
+Handshake complete
+Total time: 34117
+Retransmit count: 0
+FDTLS count : 12
