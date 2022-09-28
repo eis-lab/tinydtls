@@ -1,0 +1,101 @@
+# This is a -*- Makefile -*-
+
+ifeq ($(TARGET), redbee-econotag)
+CFLAGS += -DSHA2_USE_INTTYPES_H=1 -DLITTLE_ENDIAN=3412 -DBYTE_ORDER=LITTLE_ENDIAN
+endif
+
+ifeq ($(TARGET), wismote)
+CFLAGS += -DSHA2_USE_INTTYPES_H=1 -DLITTLE_ENDIAN=3412 -DBYTE_ORDER=LITTLE_ENDIAN
+endif
+
+ifeq ($(TARGET), exp5438)
+CFLAGS += -DSHA2_USE_INTTYPES_H=1 -DLITTLE_ENDIAN=3412 -DBYTE_ORDER=LITTLE_ENDIAN
+endif
+
+ifeq ($(TARGET), native)
+CFLAGS += -DSHA2_USE_INTTYPES_H=1
+endif
+
+ifeq ($(TARGET), minimal-net)
+CFLAGS += -DSHA2_USE_INTTYPES_H=1
+endif
+
+ifeq ($(TARGET), native)
+CFLAGS += -DSHA2_USE_INTTYPES_H=1 -DBYTE_ORDER=LITTLE_ENDIAN -DHAVE_ASSERT_H=1
+endif
+
+CFLAGS += -DDTLSv12 -DWITH_SHA256 
+tinydtls_src = dtls.c tinydtls-crypto.c hmac.c netq.c dtls_time.c peer.c session.c
+
+ifeq ($(TARGET_CC2538DK), 1)
+CFLAGS += -DCONTIKI_TARGET_CC2538DK=1
+CFLAGS += -DSHA2_USE_INTTYPES_H=1
+
+ifeq ($(WITH_HW_AES), 1)
+CFLAGS += -DCC2538DK_AES=1
+else
+tinydtls_src += rijndael.c tinydtls-ccm.c
+APPS += tinydtls/aes
+endif
+
+ifeq ($(WITH_HW_SHA256), 1)
+CFLAGS += -DCC2538DK_SHA256=1
+else
+tinydtls_src += sha2.c
+APPS += tinydtls/sha2
+endif
+
+else
+tinydtls_src += rijndael.c tinydtls-ccm.c
+APPS += tinydtls/aes
+tinydtls_src += sha2.c
+APPS += tinydtls/sha2
+endif
+
+# This adds support for TLS_PSK_WITH_AES_128_CCM_8
+ifeq ($(WITH_DTLS_PSK), 1)
+CFLAGS += -DDTLS_PSK=1
+endif
+
+# This adds support for TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8
+ifeq ($(WITH_DTLS_ECC), 1)
+CFLAGS += -DDTLS_ECC=1
+CURVE_PARAMS = SECP256R1
+include $(CONTIKI)/apps/ecc/Makefile.ecc
+APPS += ecc
+
+ifeq ($(TARGET_CC2538DK), 1)
+ifeq ($(WITH_HW_ECC), 1)
+CFLAGS += -DHW_ECC=1
+endif
+endif
+
+else
+ifndef WITH_DTLS_PSK
+WITH_DTLS_PSK=1
+CFLAGS += -DDTLS_PSK=1
+endif
+
+endif
+
+ifeq ($(WITH_DTLS_CERT), 1)
+CFLAGS += -DDTLS_PKI=1
+tinydtls_src += cert-parser.c
+endif
+
+ifdef DTLS_LOG_LEVEL
+CFLAGS += -DDTLS_LEVEL_LOG=$(DTLS_LOG_LEVEL)
+else
+CFLAGS += -DDTLS_LEVEL_LOG=DTLS_LOG_WARN
+endif
+
+# This activates debugging support
+# CFLAGS += -DNDEBUG
+tinydtls_src += debug.c
+
+# powertrace provides additional debug info about DTLS handshaking state
+ifeq ($(WITH_POWERTRACE), 1)
+include $(CONTIKI)/apps/powertrace/Makefile.powertrace
+APPS += powertrace
+CFLAGS += -DDETAIL_HANDSHAKE_STATS
+endif
